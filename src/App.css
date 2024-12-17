@@ -1,0 +1,45 @@
+/* App.css or index.css */
+
+* {
+  box-sizing: border-box; /* Ensures padding doesn’t add to width/height */
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none; /* Remove underline from links */
+  color: inherit; /* Links inherit text color */
+}
+
+ul, ol {
+  list-style: none; /* Remove default list styles */
+}
+
+button {
+  cursor: pointer; /* Consistent button cursor */
+  background: none;
+  border: none;
+}
+
+img {
+  max-width: 100%; /* Ensure images are responsive */
+  height: auto;
+}
+
+
+/* For Webkit browsers (Chrome, Safari) */
+.hidden-scrollbar {
+  -ms-overflow-style: none;  /* Hide scrollbar in IE/Edge */
+  scrollbar-width: none;     /* Hide scrollbar in Firefox */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;  /* Hide scrollbar in Chrome/Safari */
+}
+
+
