@@ -13,100 +13,46 @@ const RegistorPage = () => {
 
             <Navbar></Navbar>
 
-            <div className=' relative flex flex-col w-11/12 mx-auto'>
+            <div className=' relative mt-16 flex flex-col w-11/12 mx-auto'>
 
                 <HeroSection></HeroSection>
 
                 <LogisticFeatureSection></LogisticFeatureSection>
 
-                <div className=' relative mt-14'>
-
-                    <div className=' relative flex gap-7'>
-
-
-                        <div className='flex flex-col justify-start items-start'>
-
-                            <div className='flex flex-col justify-center items-center gap-5'>
-
-                                <div className='flex flex-col gap-4'>
-
-                                    <h1 className='text-[#272727] text-4xl font-semibold w-[60%]'>Is Your Business Held Hostage by a Single Transporter?</h1>
-
-                                    <p className='text-[#535353] text-lg w-[68%]'>With our wide range of transporter network, you gain the flexibility to switch and save on every shipment. </p>
-
-                                </div>
-
-
+                <div className="relative mt-14">
+                    <div className="relative flex flex-wrap md:flex-nowrap gap-7 items-center">
+                        {/* Text Section */}
+                        <div className="flex flex-col justify-start items-start w-full md:w-1/2 space-y-8">
+                            <div className="flex flex-col gap-4">
+                                <h1 className="text-[#272727] text-2xl md:text-4xl font-semibold">
+                                    Is Your Business Held Hostage by a Single Transporter?
+                                </h1>
+                                <p className="text-[#535353] text-base md:text-lg">
+                                    With our wide range of transporter network, you gain the flexibility to switch and save on every shipment.
+                                </p>
                             </div>
-
-                            <div className='w-[30%] justify-start items-start mt-8'>
-
-                                <Button text="Registor"></Button>
-
+                            <div>
+                                <Button text="Register" />
                             </div>
-
                         </div>
 
-                        <div className="relative flex items-center justify-center">
+                        {/* Image Section */}
+                        <div className="relative flex justify-center items-center w-full md:w-1/2">
                             {/* Red Circular Background */}
-                            <div className="w-80 h-80 bg-[#C2202B] rounded-full absolute right-20 bottom-[-0.7rem]"></div>
+                            <div className="w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 bg-[#C2202B] rounded-full absolute right-0 md:right-10 bottom-[-0.7rem]"></div>
 
                             {/* Foreground Image */}
                             <img
                                 src="/images/registor/userImage.png"
                                 alt="Delivery Person"
-                                className="relative z-10 w-auto h-auto"
+                                className="relative z-10 w-[70%] sm:w-[50%] md:w-auto h-auto max-w-full object-contain"
                             />
 
-                            {/* Smaller Rounded Images */}
-                            <div className="absolute w-16 h-16 bg-white rounded-full flex items-center justify-center top-0 left-0 shadow-md">
-                                <img
-                                    src="/images/registor/logo1.png"
-                                    alt="Logo 1"
-                                    className="w-12 h-12 rounded-full"
-                                />
-                            </div>
-
-                            <div className="absolute w-16 h-16 bg-white rounded-full flex items-center justify-center top-0 right-5 shadow-md">
-                                <img
-                                    src="/images/registor/logo2.png"
-                                    alt="Logo 2"
-                                    className="w-12 h-12 rounded-full"
-                                />
-                            </div>
-
-                            <div className="absolute w-16 h-16 bg-white rounded-full flex items-center justify-center bottom-[-1rem] left-3 shadow-md">
-                                <img
-                                    src="/images/registor/logo3.png"
-                                    alt="Logo 3"
-                                    className="w-12 h-12 rounded-full"
-                                />
-                            </div>
-
-                            <div className="absolute w-16 h-16 bg-white rounded-full flex items-center justify-center bottom-[-1rem] right-10 shadow-md">
-                                <img
-                                    src="/images/registor/logo4.png"
-                                    alt="Logo 4"
-                                    className="w-12 h-12 rounded-full"
-                                />
-                            </div>
-
-                            <div className="absolute w-16 h-16 bg-white rounded-full flex items-center justify-center bottom-[50%] right-[-1rem] shadow-md">
-                                <img
-                                    src="/images/registor/logo5.png"
-                                    alt="Logo 5"
-                                    className="w-12 h-12 rounded-full"
-                                />
-                            </div>
-                            
                         </div>
-
-
-
-
                     </div>
-
                 </div>
+
+
 
                 <Testimonials></Testimonials>
 

@@ -49,8 +49,8 @@ function handleSubmit(event) {
   
 
   return (
-    <div className=" relative w-full p-6 px-10 mt-2 py-11 flex flex-col justify-center items-center rounded-xl bg-[#F8F2F2]">
-      <h1 className="text-base text-center font-medium text-wrap mb-4 text-[#272727] w-[26vw]">
+    <div className=" relative w-full p-6 px-10 py-11 flex flex-col justify-center mt-7 md:mt-2 items-center rounded-xl bg-[#F8F2F2]">
+      <h1 className="text-base text-center font-medium text-wrap mb-4 text-[#272727] w-full md:w-[26vw]">
         Fill the form and our sales representative will call your back within 24 hours
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">

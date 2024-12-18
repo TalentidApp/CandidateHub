@@ -11,7 +11,7 @@ const ContactUs = () => {
         <div className='relative w-full h-full overflow-x-hidden'> {/* Added overflow-x-hidden here */}
             <div className='relative w-full flex-col'>
                 <Navbar />
-                <div className='relative flex flex-col w-11/12 mx-auto overflow-hidden'> {/* Keep w-11/12 */}
+                <div className='relative flex flex-col mt-16 w-11/12 mx-auto overflow-hidden'> {/* Keep w-11/12 */}
                     <HeroSection />
                     <CompanySection />
                     <FooterSection></FooterSection>
