@@ -232,7 +232,7 @@ export const logisticsFeatures = [
     {
         title: "Real-Time Tracking",
         description: "Full visibility of all your shipments from pickup to delivery.",
-        image: "",
+        image: "/images/registor/logisticfeatures/real_time_tracking.png",
     },
     {
         title: "Digital POD Access",
@@ -252,7 +252,7 @@ export const logisticsFeatures = [
     {
         title: "Access to TMS",
         description: "Get full access to our Transport Management System (TMS) to manage bookings, track shipments, and gain real-time visibility on a single platform.",
-        image: "",
+        image: "/images/registor/logisticfeatures/search-1.png",
     }
 ];
 

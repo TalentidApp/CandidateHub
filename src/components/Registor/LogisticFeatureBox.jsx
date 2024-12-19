@@ -8,7 +8,7 @@ const LogisticFeatureBox = ({ title, description, image }) => {
         <img
           src={image}
           alt={title}
-          className="w-16 h-16 sm:w-20 sm:h-20 mb-4 object-contain"
+          className="w-16 h-16 sm:w-20 sm:h-20 mb-4 object-contain mix-blend-multiply"
         />
       )}
 
