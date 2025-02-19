@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import Header from "./Header";
 
 const quizData = [
   {
-    question: "Which of the following is a NoSQL database used in the MERN stack?",
+    question:
+      "Which of the following is a NoSQL database used in the MERN stack?",
     options: ["PostgreSQL", "MySQL", "MongoDB", "SQLite"],
     answer: "MongoDB",
   },
@@ -17,9 +19,6 @@ const quizData = [
     answer: "Facebook (Meta)",
   },
 ];
-
-
-
 
 const Quiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -40,47 +39,55 @@ const Quiz = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col items-center p-10">
-      <div className="w-full max-w-2xl p-8 bg-white shadow-lg rounded-2xl border-4 border-purple-700 text-center">
-        <h2 className="text-2xl font-bold text-purple-800">Quiz</h2>
-        <div className="mt-6">
-          <p className="text-lg font-semibold">{quizData[currentQuestion].question}</p>
-          <div className="mt-4 flex flex-col gap-3">
-            {quizData[currentQuestion].options.map((option, index) => (
-              <label
-                key={index}
-                className={`p-3 border rounded-lg cursor-pointer transition-all hover:bg-purple-100 ${
-                  selectedOption === option ? "bg-purple-300" : "bg-white"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="quiz"
-                  value={option}
-                  className="hidden"
-                  onChange={() => setSelectedOption(option)}
-                />
-                {option}
-              </label>
-            ))}
+    <div className="overflow-y-auto">
+      <Header />
+      <h1 className="text-2xl text-start p-2 border-b-2">
+        Engagement 1 - Talentid.app
+      </h1>
+      <div className="min-h-screen h-[500px] overflow-y-auto bg-white text-gray-900 flex flex-col items-center p-10">
+        <div className="w-full max-w-3xl p-8 bg-white text-center">
+          <div className="mt-6">
+            <p className="text-2xl text-start font-semibold">
+              {quizData[currentQuestion].question}
+            </p>
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="space-y-2 text-xl">
+                {quizData[currentQuestion].options.map((option, index) => (
+                  <label
+                    key={index}
+                    className="flex items-center gap-3 p-3   cursor-pointer "
+                  >
+                    <input
+                      type="radio"
+                      name="quiz"
+                      value={option}
+                      className="w-5 h-5 accent-purple-500"
+                      onChange={() => setSelectedOption(option)}
+                      checked={selectedOption === option}
+                    />
+                    <span className="text-gray-800">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-        <div className="mt-6 flex justify-between">
-          <button
-            className="px-6 py-3 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600 transition-all"
-            onClick={handlePrevious}
-            disabled={currentQuestion === 0}
-          >
-            Back
-          </button>
-          <button
-            className="px-6 py-3 bg-purple-700 text-white rounded-lg shadow-md hover:bg-purple-800 transition-all"
-            onClick={handleNext}
-            disabled={currentQuestion === quizData.length - 1}
-          >
-            Next
-          </button>
-        </div>
+          <div className="mt-6 w-full px-10 gap-4 flex items-end justify-end">
+            <button
+              className="px-10 py-3 bg-gray-500 text-white rounded-full shadow-md hover:bg-gray-600 transition-all"
+              onClick={handlePrevious}
+              disabled={currentQuestion === 0}
+            >
+              Back
+            </button>
+            <button
+              className="px-10 py-3 bg-purple-700 text-white rounded-full shadow-md hover:bg-purple-800 transition-all"
+              onClick={handleNext}
+              disabled={currentQuestion === quizData.length - 1}
+            >
+              Next
+            </button>
+          </div>
       </div>
     </div>
   );

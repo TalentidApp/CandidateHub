@@ -4,12 +4,12 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-purple-50 text-gray-900">
       {/* Header */}
-      <header className="flex justify-between items-center p-4 bg-purple-700 text-white shadow-md">
+      {/* <header className="flex justify-between items-center p-4 bg-purple-700 text-white shadow-md">
         <h1 className="text-2xl font-bold">talent<span className="text-red-500">id</span></h1>
         <div className="flex items-center space-x-2">
           <span className="text-lg">Welcome, V Jai</span>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <div className="p-6">
