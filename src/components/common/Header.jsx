@@ -57,13 +57,7 @@ const Header = () => {
           type="text"
         />
 
-        {/* Clear Icon */}
-        <button
-          type="reset"
-          className="absolute right-3 -translate-y-1/2 top-1/2 p-1 text-gray-700"
-        >
-          <FaTimes className="w-5 h-5" />
-        </button>
+        
       </form>
 
       {/* User Profile Section */}
@@ -80,7 +74,7 @@ const Header = () => {
             onClick={toggleProfile}
           />
           {showProfile && (
-            <div className="absolute right-0 top-0 mt-11 w-56 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <div className="absolute z-40 right-0 top-0 mt-11 w-56 bg-white border border-gray-200 rounded-lg shadow-lg">
               <div className="flex justify-between items-center p-4 border-b">
                 <p className="text-gray-800 font-semibold">User Profile</p>
                 <FaTimes

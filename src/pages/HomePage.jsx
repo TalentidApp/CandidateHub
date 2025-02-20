@@ -12,7 +12,7 @@ const Dashboard = () => {
       <div className="p-6 bg-white h-screen flex flex-col md:flex-row gap-6">
       {/* Left Section: Content */}
       <div className="w-full md:w-2/1">
-        <h2 className="text-3xl font-semibold">Welcome Back, V Jai!</h2>
+        <h2 className="text-3xl font-bold">Welcome Back, V Jai!</h2>
         <p className="text-gray-500 mb-4">Here's what's happening in your store today</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

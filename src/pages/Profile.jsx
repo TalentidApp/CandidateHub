@@ -121,10 +121,13 @@ const CandidateProfileForm = () => {
   // Handle file upload
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    setFormData((prevData) => ({
-      ...prevData,
-      resume: file,
-    }));
+    if (file) {
+      const validTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (!validTypes.includes(file.type)) {
+        alert("Only PDF and Word documents are allowed.");
+        e.target.value = ""; // Clear the input field
+      }
+    }
   };
 
   // Handle form submission
@@ -157,7 +160,7 @@ const CandidateProfileForm = () => {
                   name="fullname"
                   value={formData.fullname}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-900"
                   placeholder="Enter full name"
                 />
               </div>
@@ -170,7 +173,7 @@ const CandidateProfileForm = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-900"
                   placeholder="Enter email"
                 />
               </div>
@@ -183,7 +186,7 @@ const CandidateProfileForm = () => {
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-900"
                   placeholder="Enter gender"
                 />
               </div>
@@ -196,7 +199,7 @@ const CandidateProfileForm = () => {
                   name="website"
                   value={formData.website}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-900"
                   placeholder="Enter website"
                 />
               </div>
@@ -210,7 +213,7 @@ const CandidateProfileForm = () => {
                 name="website"
                 value={formData.website}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-900"
                 placeholder="Enter website"
               />
             </div>
@@ -222,7 +225,7 @@ const CandidateProfileForm = () => {
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-900"
               />
             </div>
           </div>
@@ -491,22 +494,29 @@ const CandidateProfileForm = () => {
 
           {/* Upload Resume Section */}
           <div className="mb-6">
-            <label
-              className="block text-gray-700 text-md font-semibold mb-2"
-              htmlFor="resume"
-            >
-              Upload Resume
-            </label>
-            <div className="flex items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
-              <input type="file" id="resume" className="hidden" />
-              <label
-                htmlFor="resume"
-                className="text-purple-600 cursor-pointer hover:text-purple-700"
-              >
-                Click to upload
-              </label>
-            </div>
-          </div>
+  <label
+    className="block text-gray-700 text-md font-semibold mb-2"
+    htmlFor="resume"
+  >
+    Upload Resume
+  </label>
+  <div className="flex items-center justify-center w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+    <input
+      type="file"
+      id="resume"
+      accept=".pdf, .doc, .docx"
+      className="hidden"
+      onChange={handleFileUpload}
+    />
+    <label
+      htmlFor="resume"
+      className="text-purple-600 cursor-pointer hover:text-purple-700"
+    >
+      Click to upload
+    </label>
+  </div>
+</div>
+
 
           {/* Submit Button */}
           <div className="flex justify-end gap-5">
