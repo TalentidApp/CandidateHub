@@ -1,33 +1,71 @@
 import Header from "../components/common/Header";
-import { FaStar } from "react-icons/fa";  // Import FontAwesome stars
-import lg from '../assets/kb.png';
+import { FaStar } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import defaultLogo from '../assets/kb.png';
 
 const CareerPage = () => {
-  const companyData = {
-    logo: lg,
-    name: "Kotak Mahindra Bank",
-    address: "Hyderabad, Telangana, India",
-    website: "https://www.kotak.com/",
-    about: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod 
-            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
-            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod 
-            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
-            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`,
-    contactPhone: "779526789",
-    contactEmail: "jobs@kotak.com",
+  const { state } = useLocation();
+  const initialCompany = state?.company || {};
+  const [companyData, setCompanyData] = useState({
+    logo: defaultLogo,
+    name: initialCompany.companyName || "Unknown Company",
+    address: "Location not specified",
+    website: "#",
+    about: `No information available about ${initialCompany.companyName || "this company"}.`,
+    contactPhone: "N/A",
+    contactEmail: "N/A",
     rating: 4,
+  });
+
+  // Fetch company details from Proxycurl API
+  const fetchCompanyDetails = async () => {
+    try {
+      const linkedinUrl = `https://www.linkedin.com/company/${companyData.name.toLowerCase().replace(/\s+/g, '-')}`;
+      const response = await axios.get(
+        'https://nubela.co/proxycurl/api/v2/linkedin',
+        {
+          params: {
+            url: linkedinUrl,
+            fallback_to_cache: 'on-error', // Use cached data if live fetch fails
+            use_cache: 'if-present', // Use cache if available
+          },
+          headers: {
+            Authorization: "Bearer 5YNaBc83fDkUalGaRoW10w", // Replace with your Proxycurl API key
+          },
+        }
+      );
+
+      const data = response.data;
+      setCompanyData(prev => ({
+        ...prev,
+        logo: data.logo || prev.logo,
+        name: data.name || prev.name,
+        address: data.location || prev.address,
+        website: data.website || prev.website,
+        about: data.description || prev.about,
+        contactPhone: data.phone || prev.contactPhone,
+        contactEmail: data.email || prev.contactEmail,
+        rating: data.rating || prev.rating,
+      }));
+    } catch (error) {
+      console.error("Error fetching company details from Proxycurl:", error);
+    }
   };
+
+  useEffect(() => {
+    if (initialCompany.companyName) {
+      fetchCompanyDetails();
+    }
+  }, [initialCompany]);
 
   return (
     <div className="overflow-y-auto no-scrollbar">
-      <Header/>
-      
+      <Header />
       <div className="max-w-5xl h-[600px] no-scrollbar overflow-y-auto mx-auto p-6 bg-white relative top-2">
-        {/* Company Banner */}
         <div className="bg-purple-900 text-white text-center py-6 text-5xl font-semibold h-40">
-          <h3 className="px-20"> Know if your candidate is double dating you.</h3> 
-          {/* Company Logo (Half in Banner, Half Below) */}
+          <h3 className="px-20">Know if your candidate is double dating you.</h3>
           <div className="absolute left-10 top-48 transform -translate-y-1/2 w-40 h-40">
             <img
               src={companyData.logo}
@@ -49,7 +87,7 @@ const CareerPage = () => {
           <div className="w-1/3 text-gray-700 text-end">
             <div className="flex justify-end">
               {[1, 2, 3, 4, 5].map((star) => (
-                <FaStar 
+                <FaStar
                   size={22}
                   key={star}
                   className={`${star <= companyData.rating ? "text-yellow-500" : "text-gray-300"}`}
@@ -63,7 +101,6 @@ const CareerPage = () => {
           </div>
         </div>
 
-        {/* About Section */}
         <div className="mt-8">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">About Company</h3>
           <p className="text-gray-600 leading-relaxed">{companyData.about}</p>
