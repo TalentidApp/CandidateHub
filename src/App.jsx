@@ -1,47 +1,50 @@
-import { useState } from 'react'
-import './App.css'
+import { Route, Routes, Navigate } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import Profile from "./pages/Profile";
+import QuizPage from "./components/common/SingleQuiz";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import PropTypes from "prop-types";
+import CarrerPage from "./pages/CarrerPage";
+import SignUpOffer from "./pages/SignUpOffer";
+import Dashboard from "./pages/HomePage"; 
+import useAuthStore from "./constants/store";
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuthStore();
 
-import Navbar from './components/common/Navbar';
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-import { Route, Routes } from 'react-router-dom';
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
-import HomePage from './pages/HomePage';
-import Profile from './pages/Profile';
-import QuizPage from './components/common/SingleQuiz';
-
-import Signup from './pages/Signup';
-import Login from './pages/Login';
-import CarrerPage from './pages/CarrerPage';
-// import Header from './components/common/Header';
-
-
-
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 function App() {
   return (
-    <>
-      <div className="w-screen min-h-screen">
-      
-        <Routes>
-         
-          <Route path="/homepage" element={<HomePage></HomePage>}></Route>
-          <Route path="/carrerpage" element={<CarrerPage></CarrerPage>}></Route>
-
-          <Route path='/profile' element={<Profile></Profile>}></Route>
-          <Route path='/singleQuiz' element={<QuizPage></QuizPage>}></Route>
-
-          <Route path='/signup' element={<Signup></Signup>}></Route>
-
-          <Route path='/login' element={<Login></Login>}></Route>
-
-        
-        </Routes>
-
-      </div>
-    </>
+    <div className="w-screen min-h-screen">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/carrerpage" element={<CarrerPage />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/singleQuiz" element={<QuizPage />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/sign-offer" element={<SignUpOffer />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </div>
   );
 }
 
 export default App;
-
-

@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FaBell, FaUserCircle, FaCog, FaSignOutAlt, FaTimes } from 'react-icons/fa';
+import  { useState, useEffect, useRef } from 'react';
+import {  FaUserCircle, FaCog, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { MdOutlineCurrencyExchange } from "react-icons/md";
 import { MdArrowDropDown } from "react-icons/md";
 import logo from '../../assets/logo.png';
 import { FaSearch } from 'react-icons/fa';
+import useAuthStore from '../../constants/store';
 // Replace with actual image path
 
 const Header = () => {
- 
   const [showProfile, setShowProfile] = useState(false);
- 
   const profileRef = useRef(null);
-
+  const { user } = useAuthStore();
   
   const toggleProfile = () => {
     setShowProfile(!showProfile);
+    // eslint-disable-next-line no-undef
     setShowNotifications(false); 
   };
 
@@ -67,7 +67,6 @@ const Header = () => {
           <FaUserCircle
             className="text-gray-600 text-2xl cursor-pointer hover:text-purple-900 transition duration-300"
           />
-          <span className="ml-2 text-gray-600">Welcome V, Jai</span>
           <MdArrowDropDown
             size={30}
             className="mt-1 cursor-pointer"
@@ -83,13 +82,8 @@ const Header = () => {
                 />
               </div>
               <div className="p-4 text-center">
-                <img
-                  src="https://via.placeholder.com/150" // Replace with actual image URL
-                  alt="User"
-                  className="w-16 h-16 rounded-full mx-auto"
-                />
-                <p className="text-gray-800 font-semibold mt-2">John Doe</p>
-                <p className="text-gray-500 text-sm">johndoe@example.com</p>
+                <p className="text-gray-800 font-semibold mt-2">{user?.name}</p>
+                <p className="text-gray-500 text-sm">{user?.email}</p>
               </div>
               <ul className="space-y-2 p-2">
                 <li className="flex items-center text-gray-600 border-b hover:bg-gray-100 p-2 cursor-pointer">
