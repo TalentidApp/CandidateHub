@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaUserCircle, FaCog, FaSignOutAlt, FaTimes, FaSearch } from 'react-icons/fa';
-import { MdOutlineCurrencyExchange, MdArrowDropDown } from "react-icons/md";
+import { MdArrowDropDown } from "react-icons/md";
 import logo from '../../assets/logo.png';
-import useAuthStore from '../../constants/store'; // Adjust path if needed
+import useAuthStore from '../../constants/store';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,33 +10,26 @@ const Header = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [allCompanies, setAllCompanies] = useState([]);
-  const [filteredCompanies, setFilteredCompanies] = useState([]); // Start empty
+  const [filteredCompanies, setFilteredCompanies] = useState([]);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
-  const { user, logout } = useAuthStore();
+  const { user, logout, loading, error } = useAuthStore(); // Added loading and error
   const navigate = useNavigate();
 
-  const toggleProfile = () => {
-    setShowProfile(!showProfile);
-  };
+  const toggleProfile = () => setShowProfile(!showProfile);
 
-  // Fetch all companies
   const fetchAllCompanies = async () => {
     try {
-      const response = await axios.get(
-        'http://localhost:4000/api/users/search-companies',
-        { withCredentials: true }
-      );
-      const companies = response.data.data || [];
-      setAllCompanies(companies);
-      // Do NOT set filteredCompanies here; keep it empty until user interaction
+      const response = await axios.get('http://localhost:4000/api/users/search-companies', { 
+        withCredentials: true 
+      });
+      setAllCompanies(response.data.data || []);
     } catch (error) {
       console.error('Error fetching all companies:', error);
       setAllCompanies([]);
     }
   };
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -46,70 +39,81 @@ const Header = () => {
       );
       setFilteredCompanies(filtered);
     } else {
-      setFilteredCompanies([]); // Hide dropdown when query is empty
+      setFilteredCompanies([]);
     }
   };
 
-  // Show all companies when input is focused
-  const handleFocus = () => {
-    setFilteredCompanies(allCompanies);
-  };
+  const handleFocus = () => setFilteredCompanies(allCompanies);
 
-  // Navigate to CareerPage with company data
   const handleCompanyClick = (company) => {
     navigate('/carrerpage', { state: { company } });
     setSearchQuery('');
-    setFilteredCompanies([]); // Clear dropdown after selection
+    setFilteredCompanies([]);
   };
 
-  // Fetch companies on mount
+  const handleLogout = async () => {
+    try {
+      const success = await logout();
+      if (success) {
+        setShowProfile(false);
+        navigate('/login');
+      } else {
+        console.error('Logout failed:', error);
+        // Optionally show an error message to the user
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
+
   useEffect(() => {
     fetchAllCompanies();
   }, []);
 
-  // Handle click outside for profile and search dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setShowProfile(false);
-      }
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setFilteredCompanies([]); // Hide search results
-      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) setShowProfile(false);
+      if (searchRef.current && !searchRef.current.contains(event.target)) setFilteredCompanies([]);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
-    <header className="flex items-center justify-between bg-white shadow-md px-8 py-4 relative">
+    <header className="flex items-center justify-between border-b px-6 py-4 md:px-8">
+      {/* Logo */}
       <div className="flex items-center">
-        <img src={logo} alt="TalentID Logo" className="h-8 w-auto" />
+        <img
+          src={logo}
+          alt="TalentID Logo"
+          className="h-7 w-auto transform hover:rotate-12 transition-all duration-300 cursor-pointer"
+          onClick={() => navigate('/')}
+        />
       </div>
 
-      <div className="flex gap-5 space-y-4">
-        <div className="form relative top-1" ref={searchRef}>
-          <button
-            type="button"
-            className="absolute left-2 -translate-y-1/2 top-1/2 p-1 text-gray-700"
-          >
+      {/* Search and Profile */}
+      <div className="flex items-center gap-6">
+        {/* Search Bar */}
+        <div className="relative group" ref={searchRef}>
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-500 group-hover:text-indigo-700 transition-all">
             <FaSearch className="w-5 h-5" />
-          </button>
+          </span>
           <input
-            className="input pl-10 rounded-full px-8 py-3 border-2 border-transparent focus:outline-none focus:border-purple-500 placeholder-gray-400 transition-all duration-300 shadow-md w-full"
-            placeholder="Search a company"
+            className="pl-10 pr-4 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white w-64 md:w-80 transition-all duration-300"
+            placeholder="Search companies..."
             value={searchQuery}
             onChange={handleSearchChange}
-            onFocus={handleFocus} // Show all companies on focus
+            onFocus={handleFocus}
           />
           {filteredCompanies.length > 0 && (
-            <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-20 mt-2 w-full bg-white border border-indigo-100 rounded-lg shadow-md max-h-60 overflow-y-auto transform scale-95 origin-top transition-all duration-200">
               {filteredCompanies.map((company, index) => (
                 <div
                   key={index}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  className="p-3 hover:bg-indigo-100 cursor-pointer text-gray-700 hover:text-indigo-800 flex items-center gap-2 transition-all"
                   onClick={() => handleCompanyClick(company)}
                 >
+                  <span className="w-2 h-2 bg-indigo-400 rounded-full"></span>
                   {company.companyName}
                 </div>
               ))}
@@ -117,50 +121,47 @@ const Header = () => {
           )}
         </div>
 
-        <div className="flex items-center space-x-6">
-          <div className="relative flex items-center" ref={profileRef}>
-            <FaUserCircle className="text-gray-600 text-2xl cursor-pointer hover:text-purple-900 transition duration-300" />
-            <MdArrowDropDown
-              size={30}
-              className="mt-1 cursor-pointer"
-              onClick={toggleProfile}
-            />
-            {showProfile && (
-              <div className="absolute z-40 right-0 top-0 mt-11 w-56 bg-white border border-gray-200 rounded-lg shadow-lg">
-                <div className="flex justify-between items-center p-4 border-b">
-                  <p className="text-gray-800 font-semibold">User Profile</p>
-                  <FaTimes
-                    className="text-gray-600 cursor-pointer hover:text-red-500"
-                    onClick={() => setShowProfile(false)}
-                  />
-                </div>
-                <div className="p-4 text-center">
-                  <p className="text-gray-800 font-semibold mt-2">{user?.name}</p>
-                  <p className="text-gray-500 text-sm">{user?.email}</p>
-                </div>
-                <ul className="space-y-2 p-2">
-                  <li className="flex items-center text-gray-600 border-b hover:bg-gray-100 p-2 cursor-pointer">
-                    <FaUserCircle className="mr-2" /> My Profile
-                  </li>
-                  <li className="flex items-center text-gray-600 border-b hover:bg-gray-100 p-2 cursor-pointer">
-                    <FaCog className="mr-2" /> Settings
-                  </li>
-                  <li className="flex items-center text-gray-600 border-b hover:bg-gray-100 p-2 cursor-pointer">
-                    <MdOutlineCurrencyExchange className="mr-2" /> Subscription
-                  </li>
-                  <li
-                    className="flex items-center text-gray-600 hover:bg-gray-100 p-2 cursor-pointer"
-                    onClick={() => {
-                      logout();
-                      navigate('/login');
-                    }}
-                  >
-                    <FaSignOutAlt className="mr-2 text-red-500" /> Logout
-                  </li>
-                </ul>
+        {/* Profile Dropdown */}
+        <div className="relative flex items-center group" ref={profileRef}>
+          <FaUserCircle className="text-indigo-500 text-2xl cursor-pointer group-hover:text-indigo-700 transition-all duration-300" />
+          <MdArrowDropDown
+            size={28}
+            className="text-indigo-500 cursor-pointer group-hover:text-indigo-700 transition-all duration-300"
+            onClick={toggleProfile}
+          />
+          {showProfile && (
+            <div className="absolute z-40 right-0 top-full mt-3 w-64 bg-white border border-indigo-100 rounded-lg shadow-md transform scale-95 origin-top-right transition-all duration-200">
+              <div className="flex justify-between items-center p-3 border-b border-indigo-50">
+                <p className="text-indigo-700 font-semibold">My Account</p>
+                <FaTimes
+                  className="text-gray-500 cursor-pointer hover:text-red-500 transition-all"
+                  onClick={() => setShowProfile(false)}
+                />
               </div>
-            )}
-          </div>
+              <div className="p-3 text-center">
+                <p className="text-indigo-700 font-semibold">{user?.name || "User"}</p>
+                <p className="text-gray-500 text-sm">{user?.email}</p>
+              </div>
+              <ul className="space-y-1 p-2">
+                <li className="flex items-center text-gray-700 hover:bg-indigo-50 p-2 rounded-md cursor-pointer transition-all">
+                  <FaUserCircle className="mr-2 text-indigo-500" /> My Profile
+                </li>
+                <li className="flex items-center text-gray-700 hover:bg-indigo-50 p-2 rounded-md cursor-pointer transition-all">
+                  <FaCog className="mr-2 text-indigo-500" /> Settings
+                </li>
+                <li
+                  className="flex items-center text-gray-700 hover:bg-indigo-50 p-2 rounded-md cursor-pointer transition-all"
+                  onClick={handleLogout}
+                >
+                  <FaSignOutAlt className="mr-2 text-red-500" />
+                  {loading ? 'Logging out...' : 'Logout'}
+                </li>
+              </ul>
+              {error && (
+                <p className="text-red-500 text-sm p-2 text-center">{error}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </header>

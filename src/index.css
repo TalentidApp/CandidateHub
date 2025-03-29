@@ -1,4 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* App.css or index.css */
+* {
+  box-sizing: border-box; /* Ensures padding doesn’t add to width/height */
+  margin: 0;
+  padding: 0;
+  font-family: "DM Sans", sans-serif !important;
+}
+
+html, body {
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none; /* Remove underline from links */
+  color: inherit; /* Links inherit text color */
+}
+
+ul, ol {
+  list-style: none; /* Remove default list styles */
+}
+
+button {
+  cursor: pointer; /* Consistent button cursor */
+  background: none;
+  border: none;
+}
+
+img {
+  max-width: 100%; /* Ensure images are responsive */
+  height: auto;
+}
+
+
+/* For Webkit browsers (Chrome, Safari) */
+.hidden-scrollbar {
+  -ms-overflow-style: none;  /* Hide scrollbar in IE/Edge */
+  scrollbar-width: none;     /* Hide scrollbar in Firefox */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;  /* Hide scrollbar in Chrome/Safari */
+}
+
+/* From Uiverse.io by mobinkakei */ 
+.wrapper {
+  width: 200px;
+  height: 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.circle {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgb(17, 17, 178);
+  left: 15%;
+  transform-origin: 50%;
+  animation: circle7124 .5s alternate infinite ease;
+}
+
+@keyframes circle7124 {
+  0% {
+    top: 60px;
+    height: 5px;
+    border-radius: 50px 50px 25px 25px;
+    transform: scaleX(1.7);
+  }
+
+  40% {
+    height: 20px;
+    border-radius: 50%;
+    transform: scaleX(1);
+  }
+
+  100% {
+    top: 0%;
+  }
+}
+
+.circle:nth-child(2) {
+  left: 45%;
+  animation-delay: .2s;
+}
+
+.circle:nth-child(3) {
+  left: auto;
+  right: 15%;
+  animation-delay: .3s;
+}
+
+.shadow {
+  width: 20px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0.9);
+  position: absolute;
+  top: 62px;
+  transform-origin: 50%;
+  z-index: -1;
+  left: 15%;
+  filter: blur(1px);
+  animation: shadow046 .5s alternate infinite ease;
+}
+
+@keyframes shadow046 {
+  0% {
+    transform: scaleX(1.5);
+  }
+
+  40% {
+    transform: scaleX(1);
+    opacity: .7;
+  }
+
+  100% {
+    transform: scaleX(.2);
+    opacity: .4;
+  }
+}
+
+.shadow:nth-child(4) {
+  left: 45%;
+  animation-delay: .2s
+}
+
+.shadow:nth-child(5) {
+  left: auto;
+  right: 15%;
+  animation-delay: .3s;
+}
