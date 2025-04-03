@@ -20,7 +20,6 @@ const Navbar = () => {
                         alt="Company Logo" 
                         className="w-24 sm:w-32 lg:w-40 h-8"
                     />
-
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex gap-4 lg:gap-8">
                         {navbarData.map((data, index) => (

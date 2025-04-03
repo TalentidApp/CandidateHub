@@ -4,7 +4,7 @@ import { MdArrowDropDown } from "react-icons/md";
 import logo from '../../assets/logo.png';
 import useAuthStore from '../../constants/store';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [showProfile, setShowProfile] = useState(false);
@@ -13,7 +13,7 @@ const Header = () => {
   const [filteredCompanies, setFilteredCompanies] = useState([]);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
-  const { user, logout, loading, error } = useAuthStore(); // Added loading and error
+  const { user, logout, loading, error } = useAuthStore();
   const navigate = useNavigate();
 
   const toggleProfile = () => setShowProfile(!showProfile);
@@ -86,7 +86,7 @@ const Header = () => {
         <img
           src={logo}
           alt="TalentID Logo"
-          className="h-7 w-auto transform hover:rotate-12 transition-all duration-300 cursor-pointer"
+          className="h-7 w-auto transform transition-all duration-300 cursor-pointer"
           onClick={() => navigate('/')}
         />
       </div>
@@ -139,13 +139,13 @@ const Header = () => {
                 />
               </div>
               <div className="p-3 text-center">
-                <p className="text-indigo-700 font-semibold">{user?.name || "User"}</p>
-                <p className="text-gray-500 text-sm">{user?.email}</p>
+                <p className="text-indigo-700 font-semibold">{user?.data.name || "User"}</p>
+                <p className="text-gray-500 text-sm">{user?.data.email}</p>
               </div>
               <ul className="space-y-1 p-2">
-                <li className="flex items-center text-gray-700 hover:bg-indigo-50 p-2 rounded-md cursor-pointer transition-all">
+                <Link to={"/profile"} className="flex items-center text-gray-700 hover:bg-indigo-50 p-2 rounded-md cursor-pointer transition-all">
                   <FaUserCircle className="mr-2 text-indigo-500" /> My Profile
-                </li>
+                </Link>
                 <li className="flex items-center text-gray-700 hover:bg-indigo-50 p-2 rounded-md cursor-pointer transition-all">
                   <FaCog className="mr-2 text-indigo-500" /> Settings
                 </li>

@@ -37,12 +37,12 @@ const Signup = () => {
   }
 
   return (
-    <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-blue-50 to-indigo-100">
+    <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-purple-200 to-purple-300">
       <div className="md:w-1/2 flex justify-center max-md:h-[40vh] max-sm:hidden h-screen gap-3 items-center relative">
         <div className="h-1/2 relative w-5/6 max-sm:-mt-10">
           <div className="relative h-14 flex -mt-5">
             <span
-              className="cursor-pointer hover:bg-indigo-600 opacity-80 spanArrow transition-all relative w-14 h-full flex items-center justify-center selection:bg-none rounded-full text-white"
+              className="cursor-pointer hover:bg-[#652d96] opacity-80 spanArrow transition-all relative w-14 h-full flex items-center justify-center selection:bg-none rounded-full text-white"
               onClick={() => navigate("/")}
             >
               <MoveLeft className="opacity-60 arrowIcon" size={30} />
@@ -88,7 +88,7 @@ const Signup = () => {
                   type="text"
                   id="fullName"
                   {...register("fullName", { required: "Full Name is required" })}
-                  className="p-2 pl-10  bg-transparent block w-full border border-gray-300 outline-none rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="p-2 pl-10  bg-transparent block w-full border border-gray-300 outline-none rounded-md focus:ring-2 focus:ring-[#652d96]"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -112,7 +112,7 @@ const Signup = () => {
                   type="email"
                   id="email"
                   {...register("email", { required: "Email is required" })}
-                  className="p-2 pl-10 block w-full bg-transparent border border-gray-300 outline-none rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="p-2 pl-10 block w-full bg-transparent border border-gray-300 outline-none rounded-md focus:ring-2 focus:ring-[#652d96]"
                   placeholder="Enter your email"
                 />
               </div>
@@ -138,7 +138,7 @@ const Signup = () => {
                   type="password"
                   id="password"
                   {...register("password", { required: "Password is required" })}
-                  className="p-2 pl-10 block w-full bg-transparent border border-gray-300 outline-none rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="p-2 pl-10 block w-full bg-transparent border border-gray-300 outline-none rounded-md focus:ring-2 focus:ring-[#652d96]"
                   placeholder="Create your password"
                 />
               </div>
@@ -152,7 +152,7 @@ const Signup = () => {
               Already have an account?{" "}
               <span
                 onClick={() => navigate("/login")}
-                className="text-indigo-600 cursor-pointer hover:underline"
+                className="text-[#652d96] cursor-pointer hover:underline"
               >
                 Log in
               </span>
@@ -162,7 +162,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all"
+              className="w-full py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700 transition-all"
             >
               {loading ? "Creating..." : "Create Account"}
             </button>

@@ -12,10 +12,10 @@ const Dashboard = () => {
   const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
-  
-  // State for the popup
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
+  const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
 
   useEffect(() => {
     if (!isAuthenticated) fetchCandidateDetails();
@@ -39,21 +39,33 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.email) fetchOffers();
+    if (isAuthenticated && user?.data.email) fetchOffers();
   }, [isAuthenticated, user]);
 
   const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId } });
 
   const handleRejectOffer = async (offerId) => {
+    setOfferToReject(offerId); // Set the offer to reject
+    setIsConfirmOpen(true); // Open confirmation popup
+  };
+
+  const confirmRejectOffer = async () => {
+    const token = user?.token;
     try {
       await axios.post(
-        "http://localhost:4000/api/offer/offer/Declined", 
-        { offerId }, 
-        { withCredentials: true }
+        "http://localhost:4000/api/offer/offer/updateStatus",
+        { offerId: offerToReject, status: "Declined" },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
       );
-      fetchOffers();
+      fetchOffers(); // Refresh offers after rejection
     } catch (err) {
       setOffersError(err.response?.data?.message || "Failed to reject offer");
+    } finally {
+      setIsConfirmOpen(false); // Close confirmation popup
+      setOfferToReject(null); // Clear the offer to reject
     }
   };
 
@@ -62,7 +74,6 @@ const Dashboard = () => {
     setIsPopupOpen(true);
   };
 
-  // Function to close the popup
   const handleClosePopup = () => {
     setIsPopupOpen(false);
     setSelectedDocumentUrl(null);
@@ -71,7 +82,7 @@ const Dashboard = () => {
   if (loading || offersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
-        <Loader/>
+        <Loader />
       </div>
     );
   }
@@ -85,12 +96,12 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-indigo-50 to-indigo-200 text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-white via-purple-200 to-purple-300 text-gray-800">
       <Header />
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-8 text-center md:text-left">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Hey {user?.name || "User"}, Your Career Hub!
+            Hey <span className="text-[#652d96]">{user?.data.name || "User"}</span>, Your Career Hub!
           </h2>
           <p className="mt-2 text-lg">
             Discover offers, connect with companies, and take charge.
@@ -105,8 +116,8 @@ const Dashboard = () => {
                   key={offer._id}
                   className="relative bg-white/30 rounded-xl p-6 transform hover:-translate-y-2 transition-all duration-300 shadow-md hover:shadow-lg border border-indigo-100 group"
                 >
-                  <div className="absolute -top-3 -left-3 w-6 h-6 bg-indigo-500 rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
-                  <h3 className="font-semibold text-xl text-indigo-700 group-hover:text-indigo-800 transition-all">
+                  <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#652d96] rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
+                  <h3 className="font-semibold text-xl text-[#652d96] transition-all">
                     {offer.jobTitle}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
@@ -126,8 +137,8 @@ const Dashboard = () => {
                   {offer.status === "Pending" ? (
                     <div className="flex gap-3 mt-4">
                       <button
-                        onClick={() => handleSignOffer(offer.offerLink, offer._id)}
-                        className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                        onClick={() => handleSignOffer(offer.offerLink || offer.offerLetterLink, offer._id)}
+                        className="px-5 py-2 bg-[#652d96] text-white rounded-lg hover:scale-105 transition-all duration-200"
                       >
                         Sign Now
                       </button>
@@ -145,13 +156,19 @@ const Dashboard = () => {
                     >
                       Rejected
                     </button>
+                  ) :  offer.status === "Retracted" ? (
+                    <button
+                      className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700  transition-all duration-200"
+                    >
+                      Retracted
+                    </button>
                   ) : (
                     <button
-                      onClick={() => handleViewFile(offer.acceptedLetter)}
-                      className="mt-4 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
-                    >
-                      View File
-                    </button>
+                    onClick={() => handleViewFile(offer.acceptedLetter)}
+                    className="mt-4 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                  >
+                    View File
+                  </button>
                   )}
                 </div>
               ))
@@ -196,7 +213,7 @@ const Dashboard = () => {
               onClick={handleClosePopup}
               className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl font-bold"
             >
-              &times;
+              ×
             </button>
             <h3 className="text-xl font-semibold text-indigo-700 mb-4">Signed Offer Letter</h3>
             <div className="w-full h-[calc(100%-60px)]">
@@ -205,6 +222,32 @@ const Dashboard = () => {
                 title="Signed Offer Letter"
                 className="w-full h-full rounded-lg border border-gray-200"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Popup for Rejecting Offer */}
+      {isConfirmOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold text-indigo-700 mb-4">Confirm Rejection</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to reject this offer? This action cannot be undone.
+            </p>
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => setIsConfirmOpen(false)}
+                className="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRejectOffer}
+                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+              >
+                Reject
+              </button>
             </div>
           </div>
         </div>

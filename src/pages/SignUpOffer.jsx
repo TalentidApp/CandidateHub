@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const SignDocument = () => {
   const { state } = useLocation();
   const { offerId, offerLink } = state || {};
-  const pdfUrl = offerLink; // Cloudinary PDF URL
-  const [documentId, setDocumentId] = useState(null);
+  const pdfUrl = offerLink; 
+  const [, setDocumentId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,11 +22,11 @@ const SignDocument = () => {
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      const { documentId , authId } = response.data;
+      const { documentId, authId } = response.data;
       setDocumentId(documentId);
-      token = authId
+      token = authId;
 
-      console.log(response)
+      console.log(response);
       const options = {
         environment: 'sandbox',
         is_iframe: true,
@@ -37,14 +37,14 @@ const SignDocument = () => {
           } else {
             console.log('Success:', response);
 
-            const documentId = response.digio_doc_id; // e.g., DID250214125320019EUTVXRAKEPT1IW
+            const documentId = response.digio_doc_id; 
             console.log(documentId + "   " + offerId);
             try {
               const backendResponse = await axios.post(
                 'http://localhost:4000/api/candidate/handleSignedDocument',
                 {
-                  offerId: offerId, // The offerId from the state
-                  documentId: documentId, // The Digio document ID
+                  offerId: offerId, 
+                  documentId: documentId,
                 },
                 { headers: { 'Content-Type': 'application/json' } }
               );
@@ -66,7 +66,7 @@ const SignDocument = () => {
 
       const digio = new window.Digio(options);
       digio.init(); // Create iframe
-      digio.submit(documentId, 'chavarahul7@gmail.com',token);
+      digio.submit(documentId, 'chavarahul7@gmail.com', token);
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to initiate signing process');
@@ -75,20 +75,17 @@ const SignDocument = () => {
     }
   };
 
-  useEffect(() => {
-    if (pdfUrl) {
-      // Load Digio SDK dynamically if not already loaded
-      if (!window.Digio) {
-        const script = document.createElement('script');
-        script.src = 'https://ext-gateway.digio.in/sdk/v11/digio.js'; // Sandbox
-        script.async = true;
-        script.onload = () => initializeSigning();
-        document.body.appendChild(script);
-      } else {
-        initializeSigning();
-      }
-    }
-  }, [pdfUrl]);
+  // useEffect(() => {
+  //   if (pdfUrl) {
+  //     if (!window.Digio) {
+  //       const script = document.createElement('script');
+  //       script.src = 'https://ext-gateway.digio.in/sdk/v11/digio.js';
+  //       script.async = true;
+  //       script.onload = () => initializeSigning();
+  //       document.body.appendChild(script);
+  //     }
+  //   }
+  // }, [pdfUrl]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-indigo-50 to-indigo-200 text-gray-900">
@@ -109,16 +106,11 @@ const SignDocument = () => {
             Sign Your Offer Letter
           </h1>
           <p className="mt-2 text-lg text-gray-600">
-            Review the offer letter below and sign it securely with Digio.
+            Review the offer letter below and sign it securely with Us.
           </p>
         </div>
 
         {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">
-            <p>{error}</p>
-          </div>
-        )}
 
         {/* Loading State */}
         {isLoading && (
@@ -131,39 +123,30 @@ const SignDocument = () => {
 
         {/* PDF and Signing Interface */}
         {pdfUrl ? (
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
             {/* PDF Preview */}
-            <div className="w-full md:w-1/2 bg-white rounded-xl p-6 shadow-md border border-indigo-100">
+            <div className="w-full md:w-full bg-white rounded-xl p-6 shadow-md border border-indigo-100">
               <h2 className="text-xl font-semibold text-indigo-700 mb-4">Offer Letter Preview</h2>
               <div className="w-full h-[60vh] rounded-lg border border-gray-200">
                 <iframe
-                  src={pdfUrl}
+                  src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                   title="Offer Letter Preview"
                   className="w-full h-full rounded-lg"
                   onError={() => setError('Failed to load the offer letter PDF.')}
+                  style={{ border: "none" }}
                 />
               </div>
             </div>
-
-            {/* Digio Signing Interface */}
-            <div className="w-full md:w-1/2 bg-white rounded-xl p-6 shadow-md border border-indigo-100">
-              <h2 className="text-xl font-semibold text-indigo-700 mb-4">Sign the Document</h2>
-              <div className="w-full h-[60vh] rounded-lg border border-gray-200">
-                <div id="digio-iframe-container" className="w-full h-full">
-                  {/* Digio iframe will be appended here */}
-                  {!documentId && !isLoading && !error && (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-gray-600">Waiting for Digio to initialize...</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              {documentId && (
-                <p className="mt-4 text-sm text-gray-600">
-                  Document ID: <span className="font-medium">{documentId}</span>
-                </p>
-              )}
-            </div>
+            {error && (
+          <>
+          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">
+            <p>{error}</p>
+          </div>
+          </>
+        )}
+        <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200" onClick={() => initializeSigning()}>
+              Esign
+        </button>
           </div>
         ) : (
           <div className="bg-white rounded-xl p-6 shadow-md border border-indigo-100 text-center">

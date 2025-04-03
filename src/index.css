@@ -136,3 +136,21 @@ img {
   right: 15%;
   animation-delay: .3s;
 }
+
+[id*="wrapperdigio-ifm-"] {
+  width: 70% !important; /* Increase width to 75% of the viewport */
+  left: 150px !important; 
+  max-width: none !important; /* Remove any max-width constraints */
+}
+
+[id="parentdigio-ifm-"]{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@media (max-width:500px) {
+  [id*="wrapperdigio-ifm-"] {
+    left: 50px !important; 
+  }
+}

@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import useAuthStore from "../constants/store"; // Adjust path as needed
-import { MoveLeft } from "lucide-react";
+import useAuthStore from "../constants/store";
+
+const API_BASE_URL = "http://localhost:4000/api/candidate";
 
 const Login = () => {
   const {
@@ -15,8 +16,10 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showForgotPopup, setShowForgotPopup] = useState(false);
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [showResetPopup, setShowResetPopup] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const navigate = useNavigate();
   const { isAuthenticated, fetchCandidateDetails } = useAuthStore();
 
@@ -34,12 +37,11 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(
-        "http://localhost:4000/api/candidate/candidate-login",
+      await axios.post(
+        `${API_BASE_URL}/candidate-login`,
         data,
         { withCredentials: true }
       );
-      console.log("Login successful:", response.data);
       await fetchCandidateDetails();
       navigate("/");
     } catch (err) {
@@ -53,10 +55,30 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
+      await axios.post(`${API_BASE_URL}/forgot-password-email`, {
+        email: forgotEmail,
+      });
       setShowForgotPopup(false);
+      setShowOtpPopup(true);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.post(`${API_BASE_URL}/verify-otp`, {
+        email: forgotEmail,
+        otp,
+      });
+      setShowOtpPopup(false);
       setShowResetPopup(true);
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong");
+      setError(err.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
     }
@@ -67,9 +89,14 @@ const Login = () => {
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/candidate/forgot-password",
-        { email: forgotEmail, ...data }
+        `${API_BASE_URL}/forgot-password`,
+        { 
+          email: forgotEmail, 
+          password: data.password, 
+          confirmPasswordValue: data.confirmPassword 
+        }
       );
+      
       console.log("Password reset successful:", response.data);
       setShowResetPopup(false);
       alert("Password updated successfully! Please log in.");
@@ -81,17 +108,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-blue-50 to-indigo-100">
+    <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-purple-200 to-purple-300">
       {/* Left Section */}
       <div className="md:w-1/2 flex justify-center max-md:h-[40vh] max-sm:hidden h-screen gap-3 items-center relative">
         <div className="h-1/2 relative w-5/6 max-sm:-mt-10">
           <div className="relative h-14 flex -mt-5">
-            <span
-              className="cursor-pointer hover:bg-indigo-600 opacity-80 spanArrow transition-all relative w-14 h-full flex items-center justify-center selection:bg-none rounded-full text-white"
-              onClick={() => navigate("/")}
-            >
-              <MoveLeft className="opacity-60 arrowIcon" size={30} />
-            </span>
           </div>
           <div className="relative mt-4">
             <p className="lg:text-6xl md:text-5xl max-md:text-3xl leading-[80px] font-semibold flex flex-wrap gap-2">
@@ -137,7 +158,7 @@ const Login = () => {
                   type="email"
                   id="email"
                   {...register("email", { required: "Email is required" })}
-                  className="p-2 pl-10 block w-full border border-gray-300 bg-transparent outline-none rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="p-2 pl-10 block w-full border border-gray-300 bg-transparent outline-none rounded-md focus:ring-2 focus:ring-[#652d96]"
                   placeholder="Enter your email"
                 />
               </div>
@@ -163,7 +184,7 @@ const Login = () => {
                   type="password"
                   id="password"
                   {...register("password", { required: "Password is required" })}
-                  className="p-2 pl-10 block w-full border border-gray-300 outline-none bg-transparent rounded-md focus:ring-2 focus:ring-indigo-500"
+                  className="p-2 pl-10 block w-full border border-gray-300 outline-none bg-transparent rounded-md focus:ring-2 focus:ring-[#652d96]"
                   placeholder="Enter your password"
                 />
               </div>
@@ -183,11 +204,11 @@ const Login = () => {
             </p>
 
             {/* Signup Link */}
-            <p className="mt-4 text-center text-sm text-gray-600">
+            <p className="mt-4 text-center text-sm text-[#652d96]">
               Don’t have an account?{" "}
               <span
                 onClick={() => navigate("/signup")}
-                className="text-indigo-600 cursor-pointer hover:underline"
+                className="text-[#652d96] cursor-pointer hover:underline"
               >
                 Sign Up for free
               </span>
@@ -197,7 +218,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all"
+              className="w-full py-2 px-4 bg-[#652d96] text-white rounded-md  transition-all"
             >
               {loading ? "Logging in..." : "Log in"}
             </button>
@@ -205,7 +226,7 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Forgot Password Popup */}
+      {/* Forgot Password Popup - Email Input */}
       {showForgotPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -228,9 +249,41 @@ const Login = () => {
               <button
                 onClick={handleForgotPassword}
                 disabled={loading || !forgotEmail}
-                className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
               >
-                {loading ? "Submitting..." : "Submit"}
+                {loading ? "Submitting..." : "Send OTP"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OTP Popup */}
+      {showOtpPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Verify OTP</h2>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              className="p-2 block w-full border border-gray-300 rounded-md mb-4"
+            />
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowOtpPopup(false)}
+                className="py-2 px-4 bg-gray-300 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleVerifyOtp}
+                disabled={loading || !otp}
+                className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
+              >
+                {loading ? "Verifying..." : "Verify OTP"}
               </button>
             </div>
           </div>
@@ -249,7 +302,13 @@ const Login = () => {
                 </label>
                 <input
                   type="password"
-                  {...register("password", { required: "Password is required" })}
+                  {...register("password", { 
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters"
+                    }
+                  })}
                   className="p-2 block w-full border border-gray-300 rounded-md"
                 />
                 {errors.password && (
@@ -262,13 +321,15 @@ const Login = () => {
                 </label>
                 <input
                   type="password"
-                  {...register("confirmPasswordValue", {
+                  {...register("confirmPassword", {
                     required: "Please confirm your password",
+                    validate: (value, { password }) => 
+                      value === password || "Passwords do not match"
                   })}
                   className="p-2 block w-full border border-gray-300 rounded-md"
                 />
-                {errors.confirmPasswordValue && (
-                  <p className="text-red-500 text-sm">{errors.confirmPasswordValue.message}</p>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
                 )}
               </div>
               {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -283,7 +344,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
                 >
                   {loading ? "Resetting..." : "Reset Password"}
                 </button>

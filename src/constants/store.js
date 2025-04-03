@@ -14,10 +14,11 @@ const useAuthStore = create((set) => ({
         withCredentials: true,
       });
       set({
-        user: response.data.data,
+        user: response.data,
         isAuthenticated: true,
         loading: false,
       });
+      console.log(response.data)
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch candidate details",
@@ -29,9 +30,13 @@ const useAuthStore = create((set) => ({
   logout: async () => {
     set({ loading: true, error: null });
     try {
-      // Call the logout endpoint
+      const {user} = useAuthStore.getState();
+      const token = user?.token
       await axios.post("http://localhost:4000/api/candidate/candidate-logout", {}, {
         withCredentials: true,
+        headers : {
+          'Authorization' : `Bearer ${token}`
+        }
       });
       
       set({
