@@ -21,16 +21,24 @@ const Header = () => {
   const toggleProfile = () => setShowProfile(!showProfile);
 
   const fetchAllCompanies = async () => {
+    const token = useAuthStore.getState().token; // or however you're storing it
+    if (!token) {
+      console.warn("No token found. Skipping fetch.");
+      return;
+    }
+  
     try {
-      const response = await axios.get(`${API_URL}/api/users/search-companies`, { 
-        withCredentials: true 
+      const response = await axios.get(`${API_URL}/api/users/search-companies`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
       setAllCompanies(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching all companies:', error);
+      console.error('Error fetching all companies:', error.response?.data || error.message);
       setAllCompanies([]);
     }
   };
+  
 
   const handleSearchChange = (e) => {
     const query = e.target.value;

@@ -14,6 +14,14 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  
+  // separate useForm for reset password
+  const {
+    register: resetRegister,
+    handleSubmit: handleResetSubmit,
+    formState: { errors: resetErrors }
+  } = useForm();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showForgotPopup, setShowForgotPopup] = useState(false);
@@ -28,7 +36,6 @@ const Login = () => {
     fetchCandidateDetails();
   }, [fetchCandidateDetails]);
 
-
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
@@ -40,7 +47,7 @@ const Login = () => {
     setError(null);
     const success = await login(data);
     if (success) {
-      await fetchCandidateDetails(); // Fetch updated user data after login
+      await fetchCandidateDetails();
       navigate("/");
     } else {
       setError(authError || "Login failed");
@@ -85,7 +92,7 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/api/candidate/forgot-password`,
         {
           email: forgotEmail,
@@ -93,10 +100,8 @@ const Login = () => {
           confirmPasswordValue: data.confirmPassword
         }
       );
-
-      console.log("Password reset successful:", response.data);
       setShowResetPopup(false);
-      alert("Password updated successfully! Please log in.");
+      // alert("Password updated successfully! Please log in.");
     } catch (err) {
       setError(err.response?.data?.message || "Reset failed");
     } finally {
@@ -106,11 +111,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-purple-200 to-purple-300">
+
       {/* Left Section */}
       <div className="md:w-1/2 flex justify-center max-md:h-[40vh] max-sm:hidden h-screen gap-3 items-center relative">
         <div className="h-1/2 relative w-5/6 max-sm:-mt-10">
-          <div className="relative h-14 flex -mt-5">
-          </div>
           <div className="relative mt-4">
             <p className="lg:text-6xl md:text-5xl max-md:text-3xl leading-[80px] font-semibold flex flex-wrap gap-2">
               <span className="grpHover">Sign</span>
@@ -130,7 +134,7 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Section - Login Form */}
+      {/* Right Section */}
       <div className="md:w-1/2 flex flex-col justify-center items-center p-8">
         <div className="max-w-md w-full relative rounded-lg shadow-md p-6">
           <h1 className="text-3xl font-bold mb-1">Login</h1>
@@ -139,14 +143,8 @@ const Login = () => {
           </p>
 
           <form className="space-y-4" onSubmit={handleSubmit(submitHandler)}>
-            {/* Email Field */}
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email address
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
               <div className="mt-1 relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                   <FaEnvelope />
@@ -159,20 +157,12 @@ const Login = () => {
                   placeholder="Enter your email"
                 />
               </div>
-              {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               {error && <p className="text-red-500 text-sm">{error}</p>}
             </div>
 
-            {/* Password Field */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
               <div className="mt-1 relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                   <FaLock />
@@ -185,37 +175,26 @@ const Login = () => {
                   placeholder="Enter your password"
                 />
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-sm">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
             </div>
 
-            {/* Forgot Password Link */}
             <p className="mt-4 text-center text-sm text-gray-600">
-              <span
-                onClick={() => setShowForgotPopup(true)}
-                className="text-indigo-600 cursor-pointer hover:underline"
-              >
+              <span onClick={() => setShowForgotPopup(true)} className="text-indigo-600 cursor-pointer hover:underline">
                 Forgot Password?
               </span>
             </p>
 
-            {/* Signup Link */}
             <p className="mt-4 text-center text-sm text-[#652d96]">
               Don’t have an account?{" "}
-              <span
-                onClick={() => navigate("/signup")}
-                className="text-[#652d96] cursor-pointer hover:underline"
-              >
+              <span onClick={() => navigate("/signup")} className="cursor-pointer hover:underline">
                 Sign Up for free
               </span>
             </p>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-[#652d96] text-white rounded-md  transition-all"
+              className="w-full py-2 px-4 bg-[#652d96] text-white rounded-md transition-all"
             >
               {loading ? "Logging in..." : "Log in"}
             </button>
@@ -223,9 +202,9 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Forgot Password Popup - Email Input */}
+      {/* Forgot Password Popup */}
       {showForgotPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Forgot Password</h2>
             <input
@@ -237,17 +216,10 @@ const Login = () => {
             />
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowForgotPopup(false)}
-                className="py-2 px-4 bg-gray-300 rounded-md"
-              >
+              <button onClick={() => setShowForgotPopup(false)} className="py-2 px-4 bg-gray-300 rounded-md">
                 Cancel
               </button>
-              <button
-                onClick={handleForgotPassword}
-                disabled={loading || !forgotEmail}
-                className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
-              >
+              <button onClick={handleForgotPassword} disabled={loading || !forgotEmail} className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700">
                 {loading ? "Submitting..." : "Send OTP"}
               </button>
             </div>
@@ -257,7 +229,7 @@ const Login = () => {
 
       {/* OTP Popup */}
       {showOtpPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Verify OTP</h2>
             <input
@@ -269,17 +241,10 @@ const Login = () => {
             />
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowOtpPopup(false)}
-                className="py-2 px-4 bg-gray-300 rounded-md"
-              >
+              <button onClick={() => setShowOtpPopup(false)} className="py-2 px-4 bg-gray-300 rounded-md">
                 Cancel
               </button>
-              <button
-                onClick={handleVerifyOtp}
-                disabled={loading || !otp}
-                className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
-              >
+              <button onClick={handleVerifyOtp} disabled={loading || !otp} className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700">
                 {loading ? "Verifying..." : "Verify OTP"}
               </button>
             </div>
@@ -289,60 +254,43 @@ const Login = () => {
 
       {/* Reset Password Popup */}
       {showResetPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Reset Password</h2>
-            <form onSubmit={handleSubmit(handleResetPassword)}>
+            <form onSubmit={handleResetSubmit(handleResetPassword)}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  New Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700">New Password</label>
                 <input
                   type="password"
-                  {...register("password", {
+                  {...resetRegister("password", {
                     required: "Password is required",
                     minLength: {
                       value: 6,
-                      message: "Password must be at least 6 characters"
-                    }
+                      message: "Password must be at least 6 characters",
+                    },
                   })}
                   className="p-2 block w-full border border-gray-300 rounded-md"
                 />
-                {errors.password && (
-                  <p className="text-red-500 text-sm">{errors.password.message}</p>
-                )}
+                {resetErrors.password && <p className="text-red-500 text-sm">{resetErrors.password.message}</p>}
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Confirm Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
                 <input
                   type="password"
-                  {...register("confirmPassword", {
+                  {...resetRegister("confirmPassword", {
                     required: "Please confirm your password",
-                    validate: (value, { password }) =>
-                      value === password || "Passwords do not match"
+                    validate: (value, context) => value === context.password || "Passwords do not match",
                   })}
                   className="p-2 block w-full border border-gray-300 rounded-md"
                 />
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
-                )}
+                {resetErrors.confirmPassword && <p className="text-red-500 text-sm">{resetErrors.confirmPassword.message}</p>}
               </div>
               {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
               <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowResetPopup(false)}
-                  className="py-2 px-4 bg-gray-300 rounded-md"
-                >
+                <button type="button" onClick={() => setShowResetPopup(false)} className="py-2 px-4 bg-gray-300 rounded-md">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
-                >
+                <button type="submit" disabled={loading} className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700">
                   {loading ? "Resetting..." : "Reset Password"}
                 </button>
               </div>

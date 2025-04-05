@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { navbarData } from '../../utils/data';
 import { useNavigate } from 'react-router-dom';
 import { CiLocationOn } from "react-icons/ci";

@@ -8,7 +8,7 @@ import Loader from "../components/common/Loader";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading, error, fetchCandidateDetails, isAuthenticated } = useAuthStore();
+  const { user, loading, error, fetchCandidateDetails, isAuthenticated ,token } = useAuthStore();
   const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
   const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
+  
   const API_URL = import.meta.env.VITE_API_URL ?? '';
   useEffect(() => {
     if (!isAuthenticated) fetchCandidateDetails();
@@ -29,7 +30,12 @@ const Dashboard = () => {
     setOffersLoading(true);
     setOffersError(null);
     try {
-      const response = await axios.get(`${API_URL}/api/offer/offers`, { withCredentials: true });
+      const response = await axios.get(`${API_URL}/api/offer/offers`, {
+        withCredentials: true,
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+      });
       setOffers(response.data.data || []);
     } catch (err) {
       setOffersError(err.response?.data?.message || "Failed to fetch offers");
@@ -50,7 +56,6 @@ const Dashboard = () => {
   };
 
   const confirmRejectOffer = async () => {
-    const token = user?.token;
     try {
       await axios.post(
         `${API_URL}/api/offer/offer/updateStatus`,
@@ -156,7 +161,7 @@ const Dashboard = () => {
                     >
                       Rejected
                     </button>
-                  ) :  offer.status === "Retracted" ? (
+                  ) : offer.status === "Retracted" ? (
                     <button
                       className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700  transition-all duration-200"
                     >
@@ -164,11 +169,11 @@ const Dashboard = () => {
                     </button>
                   ) : (
                     <button
-                    onClick={() => handleViewFile(offer.acceptedLetter)}
-                    className="mt-4 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
-                  >
-                    View File
-                  </button>
+                      onClick={() => handleViewFile(offer.acceptedLetter)}
+                      className="mt-4 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                    >
+                      View File
+                    </button>
                   )}
                 </div>
               ))
