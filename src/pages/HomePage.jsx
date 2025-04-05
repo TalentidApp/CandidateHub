@@ -16,7 +16,8 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
   const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
-
+  // eslint-disable-next-line no-undef
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
   useEffect(() => {
     if (!isAuthenticated) fetchCandidateDetails();
   }, [fetchCandidateDetails, isAuthenticated]);
@@ -29,7 +30,7 @@ const Dashboard = () => {
     setOffersLoading(true);
     setOffersError(null);
     try {
-      const response = await axios.get("http://localhost:4000/api/offer/offers", { withCredentials: true });
+      const response = await axios.get(`${API_URL}/api/offer/offers`, { withCredentials: true });
       setOffers(response.data.data || []);
     } catch (err) {
       setOffersError(err.response?.data?.message || "Failed to fetch offers");
@@ -53,7 +54,7 @@ const Dashboard = () => {
     const token = user?.token;
     try {
       await axios.post(
-        "http://localhost:4000/api/offer/offer/updateStatus",
+        `${API_URL}/api/offer/offer/updateStatus`,
         { offerId: offerToReject, status: "Declined" },
         {
           headers: { Authorization: `Bearer ${token}` },

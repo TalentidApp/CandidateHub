@@ -14,13 +14,14 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+  // eslint-disable-next-line no-undef
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
   async function submitHandler(data) {
     setLoading(true);
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/candidate/candidate-signup",
+        `${API_URL}/api/candidate/candidate-signup`,
         {
           fullName: data.fullName,
           email: data.email,
@@ -28,7 +29,7 @@ const Signup = () => {
         }
       );
       console.log("Signup successful:", response.data);
-      navigate("/login"); // Redirect to login after signup
+      navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
     } finally {

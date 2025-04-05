@@ -1,4 +1,3 @@
-import React from "react";
 import { FaLinkedinIn, FaInstagram } from "react-icons/fa";
 import { IoLogoYoutube } from "react-icons/io";
 import { footerData } from "../../utils/data";

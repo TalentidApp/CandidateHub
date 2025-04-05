@@ -5,19 +5,21 @@ import axios from 'axios';
 const SignDocument = () => {
   const { state } = useLocation();
   const { offerId, offerLink } = state || {};
-  const pdfUrl = offerLink; 
+  const pdfUrl = offerLink;
   const [, setDocumentId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   let token = '';
+  // eslint-disable-next-line no-undef
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
   const initializeSigning = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const response = await axios.post(
-        'http://localhost:4000/api/candidate/uploadDocument',
+        `${API_URL}/api/candidate/uploadDocument`,
         { pdfUrl },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -37,13 +39,13 @@ const SignDocument = () => {
           } else {
             console.log('Success:', response);
 
-            const documentId = response.digio_doc_id; 
+            const documentId = response.digio_doc_id;
             console.log(documentId + "   " + offerId);
             try {
               const backendResponse = await axios.post(
-                'http://localhost:4000/api/candidate/handleSignedDocument',
+                `${API_URL}/api/candidate/handleSignedDocument`,
                 {
-                  offerId: offerId, 
+                  offerId: offerId,
                   documentId: documentId,
                 },
                 { headers: { 'Content-Type': 'application/json' } }
@@ -138,15 +140,15 @@ const SignDocument = () => {
               </div>
             </div>
             {error && (
-          <>
-          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">
-            <p>{error}</p>
-          </div>
-          </>
-        )}
-        <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200" onClick={() => initializeSigning()}>
+              <>
+                <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">
+                  <p>{error}</p>
+                </div>
+              </>
+            )}
+            <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200" onClick={() => initializeSigning()}>
               Esign
-        </button>
+            </button>
           </div>
         ) : (
           <div className="bg-white rounded-xl p-6 shadow-md border border-indigo-100 text-center">

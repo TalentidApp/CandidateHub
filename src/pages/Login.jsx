@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FaEnvelope, FaLock } from "react-icons/fa";
@@ -5,7 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
 
-const API_BASE_URL = "http://localhost:4000/api/candidate";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 const Login = () => {
   const {

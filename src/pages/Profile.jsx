@@ -6,12 +6,13 @@ import { FaEnvelope, FaUser, FaFileDownload, FaCode, FaBriefcase, FaSignOutAlt }
 const ProfilePage = () => {
   const { user, loading, error, fetchCandidateDetails, logout } = useAuthStore();
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     fetchCandidateDetails();
   }, [fetchCandidateDetails]);
 
-  console.log("User from store:", user); // Debug user state
+  console.log("User from store:", user); 
 
   if (loading) {
     return (

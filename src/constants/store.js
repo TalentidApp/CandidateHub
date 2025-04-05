@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import axios from "axios";
 
+
+  // eslint-disable-next-line no-undef
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+
 const useAuthStore = create((set) => ({
   user: null,
   isAuthenticated: false,
@@ -10,7 +14,7 @@ const useAuthStore = create((set) => ({
   fetchCandidateDetails: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get("http://localhost:4000/api/candidate/fetchCandidate", {
+      const response = await axios.get(`${API_URL}/api/candidate/fetchCandidate`, {
         withCredentials: true,
       });
       set({
@@ -32,7 +36,7 @@ const useAuthStore = create((set) => ({
     try {
       const {user} = useAuthStore.getState();
       const token = user?.token
-      await axios.post("http://localhost:4000/api/candidate/candidate-logout", {}, {
+      await axios.post(`${API_URL}/api/candidate/candidate-logout`, {}, {
         withCredentials: true,
         headers : {
           'Authorization' : `Bearer ${token}`

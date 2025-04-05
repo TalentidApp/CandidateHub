@@ -15,12 +15,14 @@ const Header = () => {
   const searchRef = useRef(null);
   const { user, logout, loading, error } = useAuthStore();
   const navigate = useNavigate();
+  // eslint-disable-next-line no-undef
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
   const toggleProfile = () => setShowProfile(!showProfile);
 
   const fetchAllCompanies = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/api/users/search-companies', { 
+      const response = await axios.get(`${API_URL}/api/users/search-companies`, { 
         withCredentials: true 
       });
       setAllCompanies(response.data.data || []);
