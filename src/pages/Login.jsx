@@ -6,7 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 const Login = () => {
   const {
@@ -22,11 +22,12 @@ const Login = () => {
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
-  const { isAuthenticated, fetchCandidateDetails } = useAuthStore();
+  const { isAuthenticated, login, fetchCandidateDetails, error: authError } = useAuthStore();
 
   useEffect(() => {
     fetchCandidateDetails();
   }, [fetchCandidateDetails]);
+
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -37,26 +38,21 @@ const Login = () => {
   const submitHandler = async (data) => {
     setLoading(true);
     setError(null);
-    try {
-      await axios.post(
-        `${API_BASE_URL}/candidate-login`,
-        data,
-        { withCredentials: true }
-      );
-      await fetchCandidateDetails();
+    const success = await login(data);
+    if (success) {
+      await fetchCandidateDetails(); // Fetch updated user data after login
       navigate("/");
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
+    } else {
+      setError(authError || "Login failed");
     }
+    setLoading(false);
   };
 
   const handleForgotPassword = async () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/forgot-password-email`, {
+      await axios.post(`${API_BASE_URL}/api/candidate/forgot-password-email`, {
         email: forgotEmail,
       });
       setShowForgotPopup(false);
@@ -72,7 +68,7 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/verify-otp`, {
+      await axios.post(`${API_BASE_URL}/api/candidate/verify-otp`, {
         email: forgotEmail,
         otp,
       });
@@ -90,14 +86,14 @@ const Login = () => {
     setError(null);
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/forgot-password`,
-        { 
-          email: forgotEmail, 
-          password: data.password, 
-          confirmPasswordValue: data.confirmPassword 
+        `${API_BASE_URL}/api/candidate/forgot-password`,
+        {
+          email: forgotEmail,
+          password: data.password,
+          confirmPasswordValue: data.confirmPassword
         }
       );
-      
+
       console.log("Password reset successful:", response.data);
       setShowResetPopup(false);
       alert("Password updated successfully! Please log in.");
@@ -303,7 +299,7 @@ const Login = () => {
                 </label>
                 <input
                   type="password"
-                  {...register("password", { 
+                  {...register("password", {
                     required: "Password is required",
                     minLength: {
                       value: 6,
@@ -324,7 +320,7 @@ const Login = () => {
                   type="password"
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
-                    validate: (value, { password }) => 
+                    validate: (value, { password }) =>
                       value === password || "Passwords do not match"
                   })}
                   className="p-2 block w-full border border-gray-300 rounded-md"

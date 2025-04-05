@@ -16,8 +16,7 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
   const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
-  // eslint-disable-next-line no-undef
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+  const API_URL = import.meta.env.VITE_API_URL ?? '';
   useEffect(() => {
     if (!isAuthenticated) fetchCandidateDetails();
   }, [fetchCandidateDetails, isAuthenticated]);

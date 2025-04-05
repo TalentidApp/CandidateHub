@@ -15,8 +15,8 @@ const Header = () => {
   const searchRef = useRef(null);
   const { user, logout, loading, error } = useAuthStore();
   const navigate = useNavigate();
-  // eslint-disable-next-line no-undef
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+  
+  const API_URL = import.meta.env.VITE_API_URL ?? '';
 
   const toggleProfile = () => setShowProfile(!showProfile);
 

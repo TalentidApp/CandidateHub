@@ -14,8 +14,8 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  // eslint-disable-next-line no-undef
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+  const API_URL = import.meta.env.VITE_API_URL ?? '';
+  
   async function submitHandler(data) {
     setLoading(true);
     setError(null);

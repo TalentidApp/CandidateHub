@@ -11,8 +11,7 @@ const SignDocument = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   let token = '';
-  // eslint-disable-next-line no-undef
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+  const API_URL = import.meta.env.VITE_API_URL ?? '';
 
   const initializeSigning = async () => {
     setIsLoading(true);
