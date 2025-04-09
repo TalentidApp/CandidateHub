@@ -22,7 +22,7 @@ const CareerPage = () => {
   // Fetch company details from Proxycurl API
   const fetchCompanyDetails = async () => {
     try {
-      const linkedinUrl = `https://www.linkedin.com/company/${companyData.name.toLowerCase().replace(/\s+/g, '-')}`;
+      const linkedinUrl = `https://www.linkedin.com/company/${companyData?.name.toLowerCase().replace(/\s+/g, '-')}`;
       const response = await axios.get(
         'https://nubela.co/proxycurl/api/v2/linkedin',
         {
@@ -41,7 +41,7 @@ const CareerPage = () => {
       setCompanyData(prev => ({
         ...prev,
         logo: data.logo || prev.logo,
-        name: data.name || prev.name,
+        name: data?.name || prev.name,
         address: data.location || prev.address,
         website: data.website || prev.website,
         about: data.description || prev.about,

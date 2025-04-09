@@ -106,7 +106,7 @@ const Dashboard = () => {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-8 text-center md:text-left">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Hey <span className="text-[#652d96]">{user?.data.name || "User"}</span>, Your Career Hub!
+            Hey <span className="text-[#652d96]">{ user && user?.data?.name || "User"}</span>, Your Career Hub!
           </h2>
           <p className="mt-2 text-lg">
             Discover offers, connect with companies, and take charge.
