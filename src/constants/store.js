@@ -18,7 +18,6 @@ const useAuthStore = create(persist(
         const response = await axios.post(
           `${API_URL}/api/candidate/candidate-login`,
           credentials,
-          { withCredentials: true }
         );
         const token = response.data.token;
         const userData = response.data;
@@ -46,7 +45,6 @@ const useAuthStore = create(persist(
           headers: {
             Authorization: token ? `Bearer ${token}` : undefined,
           },
-          withCredentials: true,
         });
         const userData = response.data;
         set({ user: userData, loading: false });
@@ -69,7 +67,6 @@ const useAuthStore = create(persist(
             headers: {
               Authorization: `Bearer ${token}`,
             },
-            withCredentials: true,
           }
         );
         set({

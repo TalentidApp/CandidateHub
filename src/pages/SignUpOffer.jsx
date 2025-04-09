@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -14,6 +14,11 @@ const SignDocument = () => {
   const API_URL = import.meta.env.VITE_API_URL ?? '';
 
   const initializeSigning = async () => {
+    if (!window.Digio) {
+      setError('Digio SDK is not loaded yet. Please try again.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
@@ -27,34 +32,25 @@ const SignDocument = () => {
       setDocumentId(documentId);
       token = authId;
 
-      console.log(response);
       const options = {
         environment: 'sandbox',
         is_iframe: true,
         callback: async function (response) {
           if (Object.prototype.hasOwnProperty.call(response, 'error_code')) {
-            console.log('Error:', response);
             setError('Signing failed: ' + response.message);
           } else {
-            console.log('Success:', response);
-
             const documentId = response.digio_doc_id;
-            console.log(documentId + "   " + offerId);
             try {
-              const backendResponse = await axios.post(
+               await axios.post(
                 `${API_URL}/api/candidate/handleSignedDocument`,
-                {
-                  offerId: offerId,
-                  documentId: documentId,
-                },
+                { offerId, documentId },
                 { headers: { 'Content-Type': 'application/json' } }
               );
-
-              console.log('Backend response:', backendResponse.data);
               alert('Document signed successfully! Redirecting to dashboard...');
-              setTimeout(() => navigate('/'), 2000); // Redirect after 2 seconds
+              setTimeout(() => navigate('/'), 2000);
             } catch (err) {
-              console.error('Error calling backend API:', err);
+              console.log(err)
+
               setError('Failed to process signed document');
             }
           }
@@ -66,27 +62,30 @@ const SignDocument = () => {
       };
 
       const digio = new window.Digio(options);
-      digio.init(); // Create iframe
+      digio.init();
       digio.submit(documentId, 'chavarahul7@gmail.com', token);
     } catch (err) {
-      console.error('Error:', err);
+      console.log(err)
       setError('Failed to initiate signing process');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // useEffect(() => {
-  //   if (pdfUrl) {
-  //     if (!window.Digio) {
-  //       const script = document.createElement('script');
-  //       script.src = 'https://ext-gateway.digio.in/sdk/v11/digio.js';
-  //       script.async = true;
-  //       script.onload = () => initializeSigning();
-  //       document.body.appendChild(script);
-  //     }
-  //   }
-  // }, [pdfUrl]);
+  useEffect(() => {
+    if (pdfUrl && !window.Digio) {
+      const script = document.createElement('script');
+      script.src = 'https://ext-gateway.digio.in/sdk/v11/digio.js';
+      script.async = true;
+      script.onload = () => console.log('Digio SDK loaded successfully');
+      script.onerror = () => setError('Failed to load Digio SDK');
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, [pdfUrl]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-indigo-50 to-indigo-200 text-gray-900">
@@ -100,7 +99,6 @@ const SignDocument = () => {
         </button>
       </header>
 
-      {/* Main Content */}
       <div className="p-6 max-w-7xl mx-auto">
         <div className="text-center md:text-left mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-indigo-700 tracking-tight">
@@ -110,8 +108,6 @@ const SignDocument = () => {
             Review the offer letter below and sign it securely with Us.
           </p>
         </div>
-
-        {/* Error Message */}
 
         {/* Loading State */}
         {isLoading && (
@@ -126,26 +122,37 @@ const SignDocument = () => {
         {pdfUrl ? (
           <div className="flex flex-col md:flex-row items-center justify-center gap-6">
             {/* PDF Preview */}
-            <div className="w-full md:w-full bg-white rounded-xl p-6 shadow-md border border-indigo-100">
+            <div className="w-full bg-white rounded-xl p-6 shadow-md border border-indigo-100">
               <h2 className="text-xl font-semibold text-indigo-700 mb-4">Offer Letter Preview</h2>
               <div className="w-full h-[60vh] rounded-lg border border-gray-200">
                 <iframe
                   src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                   title="Offer Letter Preview"
                   className="w-full h-full rounded-lg"
-                  onError={() => setError('Failed to load the offer letter PDF.')}
-                  style={{ border: "none" }}
+                  onError={() =>
+                    setError('Failed to load the offer letter PDF. Please ensure the URL is correct and accessible.')
+                  }
+                  style={{ border: 'none' }}
                 />
               </div>
-            </div>
-            {error && (
-              <>
-                <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">
+              {error && (
+                <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg shadow-md">
                   <p>{error}</p>
+                  <a
+                    href={pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-700 underline"
+                  >
+                    Open PDF in new tab
+                  </a>
                 </div>
-              </>
-            )}
-            <button className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200" onClick={() => initializeSigning()}>
+              )}
+            </div>
+            <button
+              className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+              onClick={initializeSigning}
+            >
               Esign
             </button>
           </div>
