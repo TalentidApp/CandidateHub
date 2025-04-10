@@ -5,7 +5,7 @@ import axios from 'axios';
 const SignDocument = () => {
   const { state } = useLocation();
   const { offerId, offerLink } = state || {};
-  const pdfUrl = offerLink;
+  const pdfUrl = offerLink?.replace('http://','https://');
   const [, setDocumentId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

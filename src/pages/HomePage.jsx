@@ -23,8 +23,8 @@ const Dashboard = () => {
   }, [fetchCandidateDetails, isAuthenticated]);
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && error) navigate("/login");
-  }, [loading, isAuthenticated, error, navigate]);
+    if (!isAuthenticated) navigate("/login");
+  }, [isAuthenticated, navigate]);
 
   const fetchOffers = async () => {
     setOffersLoading(true);
