@@ -19,8 +19,8 @@ const Dashboard = () => {
   
   const API_URL = import.meta.env.VITE_API_URL ?? '';
   useEffect(() => {
-    if (!isAuthenticated) fetchCandidateDetails();
-  }, [fetchCandidateDetails, isAuthenticated]);
+    if (!isAuthenticated && loading && error) fetchCandidateDetails();
+  }, [fetchCandidateDetails, isAuthenticated,loading,error]);
 
   useEffect(() => {
     if (!isAuthenticated) navigate("/login");

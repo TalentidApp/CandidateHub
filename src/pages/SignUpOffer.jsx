@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import useAuthStore from '../constants/store';
 
 const SignDocument = () => {
   const { state } = useLocation();
@@ -11,6 +12,8 @@ const SignDocument = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   let token = '';
+  const { user } = useAuthStore();
+
   const API_URL = import.meta.env.VITE_API_URL ?? '';
 
   const initializeSigning = async () => {
@@ -63,7 +66,7 @@ const SignDocument = () => {
 
       const digio = new window.Digio(options);
       digio.init();
-      digio.submit(documentId, 'chavarahul7@gmail.com', token);
+      digio.submit(documentId, user?.data.email, token);
     } catch (err) {
       console.log(err)
       setError('Failed to initiate signing process');
