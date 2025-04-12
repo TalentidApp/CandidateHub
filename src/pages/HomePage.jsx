@@ -48,7 +48,7 @@ const Dashboard = () => {
     if (isAuthenticated && user?.data.email) fetchOffers();
   }, [isAuthenticated, user]);
 
-  const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId } });
+  const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId , newtoken:token } });
 
   const handleRejectOffer = async (offerId) => {
     setOfferToReject(offerId); // Set the offer to reject

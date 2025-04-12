@@ -5,8 +5,8 @@ import useAuthStore from '../constants/store';
 
 const SignDocument = () => {
   const { state } = useLocation();
-  const { offerId, offerLink } = state || {};
-  const pdfUrl = offerLink?.replace('http://','https://');
+  const { offerId, offerLink, newtoken } = state || {};
+  const pdfUrl = offerLink?.replace('http://', 'https://');
   const [, setDocumentId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,11 +44,23 @@ const SignDocument = () => {
           } else {
             const documentId = response.digio_doc_id;
             try {
-               await axios.post(
+              await axios.post(
                 `${API_URL}/api/candidate/handleSignedDocument`,
                 { offerId, documentId },
                 { headers: { 'Content-Type': 'application/json' } }
               );
+              try {
+                await axios.post(
+                  `${API_URL}/api/offer/offer/updateStatus`,
+                  { offerId: offerId, status: "Accepted" },
+                  {
+                    headers: { Authorization: `Bearer ${newtoken}` },
+                    withCredentials: true,
+                  }
+                );
+              } catch (err) {
+                console.log(err)
+              }
               alert('Document signed successfully! Redirecting to dashboard...');
               setTimeout(() => navigate('/'), 2000);
             } catch (err) {
