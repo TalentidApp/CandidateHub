@@ -27,7 +27,7 @@ const SignDocument = () => {
     try {
       const response = await axios.post(
         `${API_URL}/api/candidate/uploadDocument`,
-        { pdfUrl },
+        { pdfUrl , email:user?.data.email , name:user?.data.name },
         { headers: { 'Content-Type': 'application/json' } }
       );
 
