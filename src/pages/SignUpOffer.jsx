@@ -52,7 +52,7 @@ const SignDocument = () => {
               try {
                 await axios.post(
                   `${API_URL}/api/offer/offer/updateStatus`,
-                  { offerId: offerId, status: "Accepted" },
+                  { offerId: offerId, status: "Ghosted" },
                   {
                     headers: { Authorization: `Bearer ${newtoken}` },
                     withCredentials: true,

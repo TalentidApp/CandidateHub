@@ -36,6 +36,7 @@ const Dashboard = () => {
           Authorization: token ? `Bearer ${token}` : undefined,
         },
       });
+      console.log(response.data.data)
       setOffers(response.data.data || []);
     } catch (err) {
       setOffersError(err.response?.data?.message || "Failed to fetch offers");
@@ -51,8 +52,8 @@ const Dashboard = () => {
   const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId , newtoken:token } });
 
   const handleRejectOffer = async (offerId) => {
-    setOfferToReject(offerId); // Set the offer to reject
-    setIsConfirmOpen(true); // Open confirmation popup
+    setOfferToReject(offerId);
+    setIsConfirmOpen(true);
   };
 
   const confirmRejectOffer = async () => {
@@ -65,12 +66,12 @@ const Dashboard = () => {
           withCredentials: true,
         }
       );
-      fetchOffers(); // Refresh offers after rejection
+      fetchOffers();
     } catch (err) {
       setOffersError(err.response?.data?.message || "Failed to reject offer");
     } finally {
-      setIsConfirmOpen(false); // Close confirmation popup
-      setOfferToReject(null); // Clear the offer to reject
+      setIsConfirmOpen(false);
+      setOfferToReject(null); 
     }
   };
 

@@ -20,6 +20,7 @@ const useAuthStore = create(persist(
           credentials,
         );
         const token = response.data.token;
+        console.log(token)
         const userData = response.data;
         set({
           user: userData,

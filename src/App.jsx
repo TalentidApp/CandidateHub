@@ -28,7 +28,7 @@ function App() {
     <div className="w-screen min-h-screen">
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/carrerpage" element={<CarrerPage />} />
+        <Route path="/career/:companyName" element={<CarrerPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/singleQuiz" element={<QuizPage />} />
         <Route path="/signup" element={<Signup />} />
