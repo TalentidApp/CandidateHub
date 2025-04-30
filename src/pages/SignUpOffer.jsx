@@ -26,7 +26,7 @@ const SignDocument = () => {
     setError(null);
     try {
       const response = await axios.post(
-        `${API_URL}api/candidate/uploadDocument`,
+        `${API_URL}/api/candidate/uploadDocument`,
         { pdfUrl , email:user?.data.email , name:user?.data.name },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -45,13 +45,13 @@ const SignDocument = () => {
             const documentId = response.digio_doc_id;
             try {
               await axios.post(
-                `${API_URL}api/candidate/handleSignedDocument`,
+                `${API_URL}/api/candidate/handleSignedDocument`,
                 { offerId, documentId },
                 { headers: { 'Content-Type': 'application/json' } }
               );
               try {
                 await axios.post(
-                  `${API_URL}api/offer/offer/updateStatus`,
+                  `${API_URL}/api/offer/offer/updateStatus`,
                   { offerId: offerId, status: "Ghosted" },
                   {
                     headers: { Authorization: `Bearer ${newtoken}` },

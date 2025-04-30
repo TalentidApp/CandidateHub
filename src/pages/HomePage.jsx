@@ -30,7 +30,7 @@ const Dashboard = () => {
     setOffersLoading(true);
     setOffersError(null);
     try {
-      const response = await axios.get(`${API_URL}api/offer/offers`, {
+      const response = await axios.get(`${API_URL}/api/offer/offers`, {
         withCredentials: true,
         headers: {
           Authorization: token ? `Bearer ${token}` : undefined,
@@ -59,7 +59,7 @@ const Dashboard = () => {
   const confirmRejectOffer = async () => {
     try {
       await axios.post(
-        `${API_URL}api/offer/offer/updateStatus`,
+        `${API_URL}/api/offer/offer/updateStatus`,
         { offerId: offerToReject, status: "Declined" },
         {
           headers: { Authorization: `Bearer ${token}` },
