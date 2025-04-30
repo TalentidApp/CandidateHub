@@ -21,7 +21,7 @@ const Signup = () => {
     setError(null);
     try {
       const response = await axios.post(
-        `${API_URL}/api/candidate/candidate-signup`,
+        `${API_URL}api/candidate/candidate-signup`,
         {
           fullName: data.fullName,
           email: data.email,

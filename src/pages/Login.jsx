@@ -59,7 +59,7 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/api/candidate/forgot-password-email`, {
+      await axios.post(`${API_BASE_URL}api/candidate/forgot-password-email`, {
         email: forgotEmail,
       });
       setShowForgotPopup(false);
@@ -75,7 +75,7 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${API_BASE_URL}/api/candidate/verify-otp`, {
+      await axios.post(`${API_BASE_URL}api/candidate/verify-otp`, {
         email: forgotEmail,
         otp,
       });
@@ -93,7 +93,7 @@ const Login = () => {
     setError(null);
     try {
       await axios.post(
-        `${API_BASE_URL}/api/candidate/forgot-password`,
+        `${API_BASE_URL}api/candidate/forgot-password`,
         {
           email: forgotEmail,
           password: data.password,
