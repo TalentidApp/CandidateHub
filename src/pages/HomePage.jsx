@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
   const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
   
-  const API_URL = import.meta.env.VITE_API_URL ?? '';
+  const API_URL = 'https://talentid-backend-v2.vercel.app'
   useEffect(() => {
     if (!isAuthenticated && loading && error) fetchCandidateDetails();
   }, [fetchCandidateDetails, isAuthenticated,loading,error]);

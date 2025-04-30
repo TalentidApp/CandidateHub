@@ -11,7 +11,7 @@ const TestPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+  const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
 
   useEffect(() => {
     const fetchTest = async () => {

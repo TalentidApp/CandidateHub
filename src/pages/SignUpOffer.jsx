@@ -14,7 +14,7 @@ const SignDocument = () => {
   let token = '';
   const { user } = useAuthStore();
 
-  const API_URL = import.meta.env.VITE_API_URL ?? '';
+  const API_URL = 'https://talentid-backend-v2.vercel.app';
 
   const initializeSigning = async () => {
     if (!window.Digio) {

@@ -6,7 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
 
 const Login = () => {
   const {
