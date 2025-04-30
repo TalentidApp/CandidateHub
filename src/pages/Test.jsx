@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import api from "../../utils/api";
+import axios from "axios";
 
 const TestPage = () => {
   const { testId } = useParams();
@@ -15,7 +15,7 @@ const TestPage = () => {
     const fetchTest = async () => {
       setIsLoading(true);
       try {
-        const response = await api.get(`/api/test/${testId}`);
+        const response = await axios.get(`/api/test/${testId}`);
         setTest(response.data.data);
         setAnswers(new Array(response.data.data.questions.length).fill(null));
       } catch (error) {
@@ -53,7 +53,7 @@ const TestPage = () => {
         questionIndex: index,
         selectedOption: answer,
       }));
-      const response = await api.post("/api/offer/submit-test", {
+      const response = await axios.post("/api/offer/submit-test", {
         testId,
         answers: formattedAnswers,
       });
