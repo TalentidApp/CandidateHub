@@ -9,6 +9,8 @@ import CarrerPage from "./pages/CarrerPage";
 import SignUpOffer from "./pages/SignUpOffer";
 import Dashboard from "./pages/HomePage"; 
 import useAuthStore from "./constants/store";
+import TestCompleted from "./pages/CompletedTest";
+import TestPage from "./pages/Test";
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
 
@@ -34,6 +36,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/sign-offer" element={<SignUpOffer />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/test/:testId" element={<TestPage />} />
+        <Route path="/test/completed" element={<TestCompleted />} />
         <Route
           path="/dashboard"
           element={
