@@ -4,7 +4,7 @@ import { MdArrowDropDown } from "react-icons/md";
 import logo from '../../assets/logo.png';
 import useAuthStore from '../../constants/store';
 import { Link, useNavigate } from 'react-router-dom';
-import companies from '../../constants/data';
+import axios from 'axios';
 
 const Header = () => {
   const [showProfile, setShowProfile] = useState(false);
@@ -13,15 +13,29 @@ const Header = () => {
   const [filteredCompanies, setFilteredCompanies] = useState([]);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
-  const { user, logout, loading, error } = useAuthStore();
+  const { user, logout, loading, error,token } = useAuthStore();
   const navigate = useNavigate();
+  const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
 
   const toggleProfile = () => setShowProfile(!showProfile);
 
-  // Load static company data
   useEffect(() => {
-    setAllCompanies(companies);
+    const fetchCompanies = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/users/search-companies`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setAllCompanies(res.data.data);
+      } catch (err) {
+        console.log(err.response?.data?.message || "Failed to fetch companies");
+      } 
+    };
+
+    fetchCompanies();
   }, []);
+
 
   const handleSearchChange = (e) => {
     const query = e.target.value;

@@ -36,7 +36,7 @@ const SignDocument = () => {
       token = authId;
 
       const options = {
-        environment: 'sandbox',
+        environment: 'production',
         is_iframe: true,
         callback: async function (response) {
           if (Object.prototype.hasOwnProperty.call(response, 'error_code')) {
@@ -90,7 +90,7 @@ const SignDocument = () => {
   useEffect(() => {
     if (pdfUrl && !window.Digio) {
       const script = document.createElement('script');
-      script.src = 'https://ext-gateway.digio.in/sdk/v11/digio.js';
+      script.src = 'https://app.digio.in/sdk/v11/digio.js';
       script.async = true;
       script.onload = () => console.log('Digio SDK loaded successfully');
       script.onerror = () => setError('Failed to load Digio SDK');

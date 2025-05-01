@@ -3,17 +3,18 @@ import { useState, useEffect } from "react";
 import { FaStar, FaBuilding, FaUsers, FaCalendarAlt, FaGlobe, FaPhone, FaEnvelope, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Header from "../components/common/Header";
 import defaultLogo from '../assets/kb.png';
-import companies from '../constants/data';
+import axios from "axios";
 
 const CareerPage = () => {
   const { companyName } = useParams();
+  const API_URL = "https://talentid-backend-v2.vercel.app";
   const [companyData, setCompanyData] = useState({
     logo: defaultLogo,
-    companyName: "Unknown Company",
+    companyName: decodeURIComponent(companyName) || "Unknown Company",
     address: "Location not specified",
     hqLocation: "Unknown",
     website: "#",
-    about: "No information available about this company.",
+    about: `No information available about ${decodeURIComponent(companyName) || "this company"}.`,
     shortDescription: "No description available.",
     contactPhone: "N/A",
     contactEmail: "N/A",
@@ -25,24 +26,20 @@ const CareerPage = () => {
   const [error, setError] = useState(null);
   const [isAboutExpanded, setIsAboutExpanded] = useState(false);
 
-  // Fetch company details from static data
   useEffect(() => {
-    const fetchCompanyDetails = () => {
+    const fetchCompanyDetails = async () => {
       try {
-        const normalizedName = decodeURIComponent(companyName).toLowerCase().replace(/[-_\s]+/g, '');
-        const company = companies.find(
-          (c) => c.companyName.toLowerCase().replace(/[-_\s]+/g, '') === normalizedName
-        );
-        if (!company) {
-          throw new Error(`Company "${companyName}" not found`);
-        }
+        console.log(`🚀 Fetching company: ${companyName}`);
+        const response = await axios.get(`${API_URL}/api/company/${companyName}`);
+        console.log("✅ API response:", response.data);
+        const company = response.data.data;
         setCompanyData({
           logo: company.logo || defaultLogo,
-          companyName: company.companyName || "Unknown Company",
+          companyName: company.companyName || decodeURIComponent(companyName) || "Unknown Company",
           address: company.address || "Location not specified",
-          hqLocation: company.hqLocation || "Unknown",
+          hqLocation: company.address || "Unknown",
           website: company.website || "#",
-          about: company.about || `No information available about ${company.companyName || "this company"}.`,
+          about: company.about || `No information available about ${company.companyName || decodeURIComponent(companyName) || "this company"}.`,
           shortDescription: company.shortDescription || "No description available.",
           contactPhone: company.contactPhone || "N/A",
           contactEmail: company.contactEmail || "N/A",
@@ -53,7 +50,8 @@ const CareerPage = () => {
         });
         setError(null);
       } catch (err) {
-        setError(err.message);
+        console.error("❌ Error fetching company:", err.response?.data);
+        setError(err.response?.status === 404 ? `Company "${decodeURIComponent(companyName)}" not found` : "Failed to load company data.");
         setCompanyData({
           logo: defaultLogo,
           companyName: decodeURIComponent(companyName) || "Unknown Company",
@@ -67,7 +65,7 @@ const CareerPage = () => {
           rating: 4,
           industry: "Unknown",
           employeeCount: 0,
-          foundedYear: 0
+          foundededYear: 0
         });
       }
     };
@@ -75,7 +73,7 @@ const CareerPage = () => {
     if (companyName) {
       fetchCompanyDetails();
     }
-  }, [companyName]);
+  }, [companyName, API_URL]);
 
   const toggleAbout = () => setIsAboutExpanded(!isAboutExpanded);
 
@@ -101,16 +99,16 @@ const CareerPage = () => {
             />
             <div>
               <h1 className="text-3xl md:text-4xl font-bold animate-slide-in">{companyData.companyName}</h1>
-              <p className="text-lg md:text-xl mt-2 animate-slide-in delay-100">{companyData.shortDescription}</p>
+              <p className="text-lg md:text-xl mt-2 animate-slide-in delay-100">{companyData.about}</p>
               <div className="flex items-center mt-4">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar
                     key={star}
                     size={20}
-                    className={star <= Math.round(companyData.rating) ? "text-yellow-400" : "text-gray-300"}
+                    className={star <= Math.round(companyData.rating || 4) ? "text-yellow-400" : "text-gray-300"}
                   />
                 ))}
-                <span className="ml-2 text-sm font-semibold">{companyData.rating.toFixed(1)}</span>
+                <span className="ml-2 text-sm font-semibold">{(companyData.rating || 4).toFixed(1)}</span>
               </div>
             </div>
           </div>
@@ -122,14 +120,14 @@ const CareerPage = () => {
           <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Company Stats</h3>
             <div className="space-y-4">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <FaBuilding className="text-purple-600 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Industry</p>
                   <p className="font-semibold">{companyData.industry}</p>
                 </div>
-              </div>
-              <div className="flex items-center">
+              </div> */}
+              {/* <div className="flex items-center">
                 <FaUsers className="text-purple-600 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Employees</p>
@@ -142,7 +140,7 @@ const CareerPage = () => {
                   <p className="text-sm text-gray-500">Founded</p>
                   <p className="font-semibold">{companyData.foundedYear || "N/A"}</p>
                 </div>
-              </div>
+              </div> */}
               <div className="flex items-center">
                 <FaGlobe className="text-purple-600 mr-3" />
                 <div>
@@ -184,7 +182,7 @@ const CareerPage = () => {
                   className="font-semibold text-purple-600 hover:text-purple-800 flex items-center transition-all duration-200"
                   aria-label={`Visit ${companyData.companyName} website`}
                 >
-                  <FaGlobe className="mr-2" />
+                  {/* <FaPlasma className="mr-2" /> */}
                   {companyData.website.replace(/^https?:\/\//, '')}
                 </a>
               </div>
@@ -230,11 +228,11 @@ const CareerPage = () => {
           <ul className="space-y-3 text-gray-600">
             <li className="flex items-center">
               <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
-              Recognized as a leader in {companyData.industry} by industry analysts.
+              Recognized as a leader in {companyData.industry || "its field"} by industry analysts.
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
-              Serving clients in over {Math.ceil(companyData.employeeCount / 100)} countries.
+              Serving clients in over {Math.ceil(companyData.employeeCount / 100) || 1} countries.
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
