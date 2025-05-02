@@ -14,17 +14,22 @@ const Dashboard = () => {
   const [offersError, setOffersError] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
-  const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [offerToReject, setOfferToReject] = useState(null);
 
-  const API_URL = 'https://talentid-backend-v2.vercel.app'
-  useEffect(() => {
-    if (!isAuthenticated && loading && error) fetchCandidateDetails();
-  }, [fetchCandidateDetails, isAuthenticated, loading, error]);
+  const API_URL = "https://talentid-backend-v2.vercel.app";
 
   useEffect(() => {
-    if (!isAuthenticated) navigate("/login");
-  }, [isAuthenticated, navigate]);
+    if (!isAuthenticated || !token) {
+      navigate("/login", { replace: true });
+    }
+  }, [isAuthenticated, token, navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated && !user?.data?.email && !loading && !error) {
+      fetchCandidateDetails();
+    }
+  }, [fetchCandidateDetails, isAuthenticated, user, loading, error]);
 
   const fetchOffers = async () => {
     setOffersLoading(true);
@@ -36,7 +41,7 @@ const Dashboard = () => {
           Authorization: token ? `Bearer ${token}` : undefined,
         },
       });
-      console.log(response.data.data)
+      console.log(response.data.data);
       setOffers(response.data.data || []);
     } catch (err) {
       setOffersError(err.response?.data?.message || "Failed to fetch offers");
@@ -46,10 +51,13 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.data.email) fetchOffers();
+    if (isAuthenticated && user?.data?.email) {
+      fetchOffers();
+    }
   }, [isAuthenticated, user]);
 
-  const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId, newtoken: token } });
+  const handleSignOffer = (offerLink, offerId) =>
+    navigate("/sign-offer", { state: { offerLink, offerId, newtoken: token } });
 
   const handleRejectOffer = async (offerId) => {
     setOfferToReject(offerId);
@@ -85,6 +93,7 @@ const Dashboard = () => {
     setSelectedDocumentUrl(null);
   };
 
+  // Render loading state
   if (loading || offersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
@@ -93,6 +102,7 @@ const Dashboard = () => {
     );
   }
 
+  // Render error state
   if (error || offersError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
@@ -101,13 +111,14 @@ const Dashboard = () => {
     );
   }
 
+  // Main dashboard content
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-purple-200 to-purple-300 text-gray-800">
       <Header />
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-8 text-center md:text-left">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Hey <span className="text-[#652d96]">{user && user?.data?.name || "User"}</span>, Your Career Hub!
+            Hey <span className="text-[#652d96]">{user?.data?.name || "User"}</span>, Your Career Hub!
           </h2>
           <p className="mt-2 text-lg">
             Discover offers, connect with companies, and take charge.
@@ -131,7 +142,7 @@ const Dashboard = () => {
                   </p>
                   <div className="mt-3 space-y-1">
                     <p className="text-sm text-gray-500">
-                      Status: <span className="font-medium text-indigo-600">{ offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
+                      Status: <span className="font-medium text-indigo-600">{offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
                     </p>
                     <p className="text-sm text-gray-500">
                       Offered: {new Date(offer.offerDate).toLocaleDateString()}
@@ -164,7 +175,7 @@ const Dashboard = () => {
                     </button>
                   ) : offer.status === "Retracted" ? (
                     <button
-                      className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700  transition-all duration-200"
+                      className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200"
                     >
                       Retracted
                     </button>
@@ -191,7 +202,7 @@ const Dashboard = () => {
                   Search companies and unlock new opportunities!
                 </p>
                 <button
-                  onClick={() => navigate('/carrerpage')}
+                  onClick={() => navigate("/carrerpage")}
                   className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
                 >
                   Explore Now
@@ -217,7 +228,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Popup for displaying the accepted letter */}
       {isPopupOpen && selectedDocumentUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-4xl h-[80vh] relative">
@@ -239,7 +249,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Confirmation Popup for Rejecting Offer */}
       {isConfirmOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">

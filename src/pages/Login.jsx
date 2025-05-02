@@ -32,9 +32,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login, fetchCandidateDetails, error: authError } = useAuthStore();
 
-  useEffect(() => {
-    fetchCandidateDetails();
-  }, [fetchCandidateDetails]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -101,7 +98,6 @@ const Login = () => {
         }
       );
       setShowResetPopup(false);
-      // alert("Password updated successfully! Please log in.");
     } catch (err) {
       setError(err.response?.data?.message || "Reset failed");
     } finally {
@@ -112,7 +108,6 @@ const Login = () => {
   return (
     <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-purple-200 to-purple-300">
 
-      {/* Left Section */}
       <div className="md:w-1/2 flex justify-center max-md:h-[40vh] max-sm:hidden h-screen gap-3 items-center relative">
         <div className="h-1/2 relative w-5/6 max-sm:-mt-10">
           <div className="relative mt-4">
