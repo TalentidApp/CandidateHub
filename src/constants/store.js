@@ -40,6 +40,7 @@ const useAuthStore = create(persist(
 
     fetchCandidateDetails: async () => {
       const { token } = get();
+      // if(!token) window.location.href = '/login'
       set({ loading: true, error: null });
       try {
         const response = await axios.get(`${API_URL}/api/candidate/fetchCandidate`, {

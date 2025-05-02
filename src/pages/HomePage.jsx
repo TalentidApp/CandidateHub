@@ -8,7 +8,7 @@ import Loader from "../components/common/Loader";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading, error, fetchCandidateDetails, isAuthenticated ,token } = useAuthStore();
+  const { user, loading, error, fetchCandidateDetails, isAuthenticated, token } = useAuthStore();
   const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
@@ -16,11 +16,11 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false); // State for confirmation popup
   const [offerToReject, setOfferToReject] = useState(null); // Store offer ID to reject
-  
+
   const API_URL = 'https://talentid-backend-v2.vercel.app'
   useEffect(() => {
     if (!isAuthenticated && loading && error) fetchCandidateDetails();
-  }, [fetchCandidateDetails, isAuthenticated,loading,error]);
+  }, [fetchCandidateDetails, isAuthenticated, loading, error]);
 
   useEffect(() => {
     if (!isAuthenticated) navigate("/login");
@@ -49,7 +49,7 @@ const Dashboard = () => {
     if (isAuthenticated && user?.data.email) fetchOffers();
   }, [isAuthenticated, user]);
 
-  const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId , newtoken:token } });
+  const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId, newtoken: token } });
 
   const handleRejectOffer = async (offerId) => {
     setOfferToReject(offerId);
@@ -71,7 +71,7 @@ const Dashboard = () => {
       setOffersError(err.response?.data?.message || "Failed to reject offer");
     } finally {
       setIsConfirmOpen(false);
-      setOfferToReject(null); 
+      setOfferToReject(null);
     }
   };
 
@@ -107,7 +107,7 @@ const Dashboard = () => {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-8 text-center md:text-left">
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Hey <span className="text-[#652d96]">{ user && user?.data?.name || "User"}</span>, Your Career Hub!
+            Hey <span className="text-[#652d96]">{user && user?.data?.name || "User"}</span>, Your Career Hub!
           </h2>
           <p className="mt-2 text-lg">
             Discover offers, connect with companies, and take charge.
@@ -131,7 +131,7 @@ const Dashboard = () => {
                   </p>
                   <div className="mt-3 space-y-1">
                     <p className="text-sm text-gray-500">
-                      Status: <span className="font-medium text-indigo-600">{offer.status}</span>
+                      Status: <span className="font-medium text-indigo-600">{ offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
                     </p>
                     <p className="text-sm text-gray-500">
                       Offered: {new Date(offer.offerDate).toLocaleDateString()}
@@ -167,6 +167,12 @@ const Dashboard = () => {
                       className="mt-4 px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700  transition-all duration-200"
                     >
                       Retracted
+                    </button>
+                  ) : offer.status === "Ghosted" ? (
+                    <button
+                      className="mt-4 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                    >
+                      Accepted
                     </button>
                   ) : (
                     <button

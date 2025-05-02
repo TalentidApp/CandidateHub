@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FaStar, FaBuilding, FaUsers, FaCalendarAlt, FaGlobe, FaPhone, FaEnvelope, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaStar, FaGlobe, FaPhone, FaEnvelope, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Header from "../components/common/Header";
 import defaultLogo from '../assets/kb.png';
 import axios from "axios";

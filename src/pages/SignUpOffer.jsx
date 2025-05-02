@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../constants/store';
+import toast from 'react-hot-toast';
 
 const SignDocument = () => {
   const { state } = useLocation();
@@ -36,7 +37,7 @@ const SignDocument = () => {
       token = authId;
 
       const options = {
-        environment: 'production',
+        environment: 'sandbox',
         is_iframe: true,
         callback: async function (response) {
           if (Object.prototype.hasOwnProperty.call(response, 'error_code')) {
@@ -52,7 +53,7 @@ const SignDocument = () => {
               try {
                 await axios.post(
                   `${API_URL}/api/offer/offer/updateStatus`,
-                  { offerId: offerId, status: "Ghosted" },
+                  { offerId: offerId, status: "Accepted" },
                   {
                     headers: { Authorization: `Bearer ${newtoken}` },
                     withCredentials: true,
@@ -61,7 +62,7 @@ const SignDocument = () => {
               } catch (err) {
                 console.log(err)
               }
-              alert('Document signed successfully! Redirecting to dashboard...');
+              toast.success('Document signed successfully!');
               setTimeout(() => navigate('/'), 2000);
             } catch (err) {
               console.log(err)
@@ -78,6 +79,7 @@ const SignDocument = () => {
 
       const digio = new window.Digio(options);
       digio.init();
+      console.log(documentId, user?.data.email, token)
       digio.submit(documentId, user?.data.email, token);
     } catch (err) {
       console.log(err)
