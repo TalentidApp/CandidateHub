@@ -6,9 +6,11 @@ import useAuthStore from "../constants/store";
 import axios from "axios";
 import Loader from "../components/common/Loader";
 
+const API_URL = 'https://talentid-backend-v2.vercel.app';
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading, error, fetchCandidateDetails, isAuthenticated, token } = useAuthStore();
+  const { user, loading, error, fetchCandidateDetails, isAuthenticated, token, logout } = useAuthStore();
   const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
@@ -16,45 +18,63 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [offerToReject, setOfferToReject] = useState(null);
-
-  const API_URL = "https://talentid-backend-v2.vercel.app";
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
+    console.log("Dashboard auth state:", { isAuthenticated, token, user }); // Debug log
     if (!isAuthenticated || !token) {
+      console.log("Redirecting to login due to missing auth or token"); // Debug log
+      logout();
       navigate("/login", { replace: true });
+    } else {
+      setAuthChecked(true);
     }
-  }, [isAuthenticated, token, navigate]);
+  }, [isAuthenticated, token, navigate, logout]);
 
   useEffect(() => {
-    if (isAuthenticated && !user?.data?.email && !loading && !error) {
+    if (authChecked && isAuthenticated && !user?.data?.email && !loading && !error) {
+      console.log("Fetching candidate details"); // Debug log
       fetchCandidateDetails();
     }
-  }, [fetchCandidateDetails, isAuthenticated, user, loading, error]);
+  }, [authChecked, fetchCandidateDetails, isAuthenticated, user, loading, error]);
 
   const fetchOffers = async () => {
+    if (!token) {
+      console.warn("No token for fetchOffers"); // Debug log
+      setOffersError("No token found");
+      logout();
+      navigate("/login", { replace: true });
+      return;
+    }
     setOffersLoading(true);
     setOffersError(null);
     try {
       const response = await axios.get(`${API_URL}/api/offer/offers`, {
+        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
-        headers: {
-          Authorization: token ? `Bearer ${token}` : undefined,
-        },
       });
-      console.log(response.data.data);
+      console.log("Fetch offers response:", response.data); // Debug log
       setOffers(response.data.data || []);
     } catch (err) {
-      setOffersError(err.response?.data?.message || "Failed to fetch offers");
+      console.error("Fetch offers error:", err.response?.data); // Debug log
+      if (err.response?.status === 401) {
+        setOffersError("Session expired. Please log in again.");
+        logout();
+        navigate("/login", { replace: true });
+      } else {
+        setOffersError(err.response?.data?.message || "Failed to fetch offers");
+      }
     } finally {
       setOffersLoading(false);
     }
   };
 
   useEffect(() => {
-    if (isAuthenticated && user?.data?.email) {
+    if (authChecked && isAuthenticated && user?.data?.email) {
+      console.log("Fetching offers"); // Debug log
       fetchOffers();
     }
-  }, [isAuthenticated, user]);
+  }, [authChecked, isAuthenticated, user]);
 
   const handleSignOffer = (offerLink, offerId) =>
     navigate("/sign-offer", { state: { offerLink, offerId, newtoken: token } });
@@ -76,7 +96,14 @@ const Dashboard = () => {
       );
       fetchOffers();
     } catch (err) {
-      setOffersError(err.response?.data?.message || "Failed to reject offer");
+      console.error("Reject offer error:", err.response?.data); // Debug log
+      if (err.response?.status === 401) {
+        setOffersError("Session expired. Please log in again.");
+        logout();
+        navigate("/login", { replace: true });
+      } else {
+        setOffersError(err.response?.data?.message || "Failed to reject offer");
+      }
     } finally {
       setIsConfirmOpen(false);
       setOfferToReject(null);
@@ -93,8 +120,7 @@ const Dashboard = () => {
     setSelectedDocumentUrl(null);
   };
 
-  // Render loading state
-  if (loading || offersLoading) {
+  if (!authChecked || loading || offersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
         <Loader />
@@ -102,7 +128,6 @@ const Dashboard = () => {
     );
   }
 
-  // Render error state
   if (error || offersError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
@@ -111,7 +136,6 @@ const Dashboard = () => {
     );
   }
 
-  // Main dashboard content
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-purple-200 to-purple-300 text-gray-800">
       <Header />

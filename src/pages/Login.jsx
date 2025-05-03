@@ -6,7 +6,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
 
-const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
 
 const Login = () => {
   const {
@@ -14,12 +13,11 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  
-  // separate useForm for reset password
+
   const {
     register: resetRegister,
     handleSubmit: handleResetSubmit,
-    formState: { errors: resetErrors }
+    formState: { errors: resetErrors },
   } = useForm();
 
   const [loading, setLoading] = useState(false);
@@ -30,23 +28,32 @@ const Login = () => {
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
-  const { isAuthenticated, login, fetchCandidateDetails, error: authError } = useAuthStore();
+  const { isAuthenticated, login, fetchCandidateDetails, error: authError, clearAuthState } = useAuthStore();
 
+  useEffect(() => {
+    console.log("Login component mounted, auth state:", { isAuthenticated }); // Debug log
+    clearAuthState();
+  }, [clearAuthState]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      console.log("Authenticated, redirecting to dashboard"); // Debug log
+      navigate("/", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
   const submitHandler = async (data) => {
     setLoading(true);
     setError(null);
+    console.log("Attempting login with:", data); // Debug log
     const success = await login(data);
     if (success) {
+      console.log("Login successful, fetching candidate details"); // Debug log
       await fetchCandidateDetails();
-      navigate("/");
+      console.log("Redirecting to dashboard"); // Debug log
+      navigate("/", { replace: true });
     } else {
+      console.log("Login failed, error:", authError); // Debug log
       setError(authError || "Login failed");
     }
     setLoading(false);
@@ -55,13 +62,15 @@ const Login = () => {
   const handleForgotPassword = async () => {
     setLoading(true);
     setError(null);
+    console.log("Sending OTP for forgot password:", forgotEmail); // Debug log
     try {
-      await axios.post(`${API_BASE_URL}api/candidate/forgot-password-email`, {
+      await axios.post(`${API_URL}/api/candidate/forgot-password-email`, {
         email: forgotEmail,
       });
       setShowForgotPopup(false);
       setShowOtpPopup(true);
     } catch (err) {
+      console.error("Forgot password error:", err.response?.data); // Debug log
       setError(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
@@ -71,14 +80,16 @@ const Login = () => {
   const handleVerifyOtp = async () => {
     setLoading(true);
     setError(null);
+    console.log("Verifying OTP:", { email: forgotEmail, otp }); // Debug log
     try {
-      await axios.post(`${API_BASE_URL}api/candidate/verify-otp`, {
+      await axios.post(`${API_URL}/api/candidate/verify-otp`, {
         email: forgotEmail,
         otp,
       });
       setShowOtpPopup(false);
       setShowResetPopup(true);
     } catch (err) {
+      console.error("OTP verification error:", err.response?.data); // Debug log
       setError(err.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
@@ -88,17 +99,17 @@ const Login = () => {
   const handleResetPassword = async (data) => {
     setLoading(true);
     setError(null);
+    console.log("Resetting password for:", forgotEmail); // Debug log
     try {
-      await axios.post(
-        `${API_BASE_URL}api/candidate/forgot-password`,
-        {
-          email: forgotEmail,
-          password: data.password,
-          confirmPasswordValue: data.confirmPassword
-        }
-      );
+      await axios.post(`${API_URL}/api/candidate/forgot-password`, {
+        email: forgotEmail,
+        password: data.password,
+        confirmPasswordValue: data.confirmPassword,
+      });
       setShowResetPopup(false);
+      navigate("/login", { replace: true });
     } catch (err) {
+      console.error("Reset password error:", err.response?.data); // Debug log
       setError(err.response?.data?.message || "Reset failed");
     } finally {
       setLoading(false);
@@ -107,7 +118,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex relative max-md:flex-col max-sm:justify-center overflow-hidden bg-gradient-to-br from-white via-purple-200 to-purple-300">
-
       <div className="md:w-1/2 flex justify-center max-md:h-[40vh] max-sm:hidden h-screen gap-3 items-center relative">
         <div className="h-1/2 relative w-5/6 max-sm:-mt-10">
           <div className="relative mt-4">
@@ -129,7 +139,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Section */}
       <div className="md:w-1/2 flex flex-col justify-center items-center p-8">
         <div className="max-w-md w-full relative rounded-lg shadow-md p-6">
           <h1 className="text-3xl font-bold mb-1">Login</h1>
@@ -139,7 +148,9 @@ const Login = () => {
 
           <form className="space-y-4" onSubmit={handleSubmit(submitHandler)}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
               <div className="mt-1 relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                   <FaEnvelope />
@@ -157,7 +168,9 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
               <div className="mt-1 relative">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                   <FaLock />
@@ -174,7 +187,10 @@ const Login = () => {
             </div>
 
             <p className="mt-4 text-center text-sm text-gray-600">
-              <span onClick={() => setShowForgotPopup(true)} className="text-indigo-600 cursor-pointer hover:underline">
+              <span
+                onClick={() => setShowForgotPopup(true)}
+                className="text-indigo-600 cursor-pointer hover:underline"
+              >
                 Forgot Password?
               </span>
             </p>
@@ -197,7 +213,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Forgot Password Popup */}
       {showForgotPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -211,10 +226,17 @@ const Login = () => {
             />
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowForgotPopup(false)} className="py-2 px-4 bg-gray-300 rounded-md">
+              <button
+                onClick={() => setShowForgotPopup(false)}
+                className="py-2 px-4 bg-gray-300 rounded-md"
+              >
                 Cancel
               </button>
-              <button onClick={handleForgotPassword} disabled={loading || !forgotEmail} className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700">
+              <button
+                onClick={handleForgotPassword}
+                disabled={loading || !forgotEmail}
+                className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
+              >
                 {loading ? "Submitting..." : "Send OTP"}
               </button>
             </div>
@@ -222,7 +244,6 @@ const Login = () => {
         </div>
       )}
 
-      {/* OTP Popup */}
       {showOtpPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -236,10 +257,17 @@ const Login = () => {
             />
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowOtpPopup(false)} className="py-2 px-4 bg-gray-300 rounded-md">
+              <button
+                onClick={() => setShowOtpPopup(false)}
+                className="py-2 px-4 bg-gray-300 rounded-md"
+              >
                 Cancel
               </button>
-              <button onClick={handleVerifyOtp} disabled={loading || !otp} className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700">
+              <button
+                onClick={handleVerifyOtp}
+                disabled={loading || !otp}
+                className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
+              >
                 {loading ? "Verifying..." : "Verify OTP"}
               </button>
             </div>
@@ -247,7 +275,6 @@ const Login = () => {
         </div>
       )}
 
-      {/* Reset Password Popup */}
       {showResetPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -266,7 +293,9 @@ const Login = () => {
                   })}
                   className="p-2 block w-full border border-gray-300 rounded-md"
                 />
-                {resetErrors.password && <p className="text-red-500 text-sm">{resetErrors.password.message}</p>}
+                {resetErrors.password && (
+                  <p className="text-red-500 text-sm">{resetErrors.password.message}</p>
+                )}
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
@@ -278,14 +307,24 @@ const Login = () => {
                   })}
                   className="p-2 block w-full border border-gray-300 rounded-md"
                 />
-                {resetErrors.confirmPassword && <p className="text-red-500 text-sm">{resetErrors.confirmPassword.message}</p>}
+                {resetErrors.confirmPassword && (
+                  <p className="text-red-500 text-sm">{resetErrors.confirmPassword.message}</p>
+                )}
               </div>
               {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowResetPopup(false)} className="py-2 px-4 bg-gray-300 rounded-md">
+                <button
+                  type="button"
+                  onClick={() => setShowResetPopup(false)}
+                  className="py-2 px-4 bg-gray-300 rounded-md"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="py-2 px-4 bg-[#652d96] text-white rounded-md hover:bg-indigo-700"
+                >
                   {loading ? "Resetting..." : "Reset Password"}
                 </button>
               </div>
