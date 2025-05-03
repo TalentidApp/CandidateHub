@@ -11,6 +11,8 @@ import Dashboard from "./pages/HomePage";
 import useAuthStore from "./constants/store";
 import TestCompleted from "./pages/CompletedTest";
 import TestPage from "./pages/Test";
+import NotFound from "./pages/NotFound";
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
 
@@ -46,6 +48,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+      <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
