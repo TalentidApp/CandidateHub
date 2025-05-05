@@ -10,7 +10,7 @@ const API_URL = 'https://talentid-backend-v2.vercel.app';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading, error, fetchCandidateDetails, isAuthenticated, token, logout } = useAuthStore();
+  const { user, loading, error, isAuthenticated, token, checkAuth } = useAuthStore();
   const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
@@ -18,31 +18,27 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [offerToReject, setOfferToReject] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   useEffect(() => {
-    console.log("Dashboard auth state:", { isAuthenticated, token, user }); // Debug log
-    if (!isAuthenticated || !token) {
-      console.log("Redirecting to login due to missing auth or token"); // Debug log
-      logout();
-      navigate("/login", { replace: true });
-    } else {
-      setAuthChecked(true);
-    }
-  }, [isAuthenticated, token, navigate, logout]);
-
-  useEffect(() => {
-    if (authChecked && isAuthenticated && !user?.data?.email && !loading && !error) {
-      console.log("Fetching candidate details"); // Debug log
-      fetchCandidateDetails();
-    }
-  }, [authChecked, fetchCandidateDetails, isAuthenticated, user, loading, error]);
+    const verifyAuth = async () => {
+      if (isAuthenticated && token && user) {
+        setIsAuthChecked(true);
+        return;
+      }
+      const isValid = await checkAuth();
+      setIsAuthChecked(true);
+      if (!isValid) {
+        console.log("Redirecting to login due to invalid auth");
+        navigate("/login", { replace: true });
+      }
+    };
+    verifyAuth();
+  }, [isAuthenticated, token, user, checkAuth, navigate]);
 
   const fetchOffers = async () => {
     if (!token) {
-      console.warn("No token for fetchOffers"); // Debug log
       setOffersError("No token found");
-      logout();
       navigate("/login", { replace: true });
       return;
     }
@@ -53,13 +49,13 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
-      console.log("Fetch offers response:", response.data); // Debug log
+      console.log("Fetch offers response:", response.data);
       setOffers(response.data.data || []);
     } catch (err) {
-      console.error("Fetch offers error:", err.response?.data); // Debug log
+      console.error("Fetch offers error:", err.response?.data);
       if (err.response?.status === 401) {
         setOffersError("Session expired. Please log in again.");
-        logout();
+        useAuthStore.getState().clearAuthState();
         navigate("/login", { replace: true });
       } else {
         setOffersError(err.response?.data?.message || "Failed to fetch offers");
@@ -70,11 +66,11 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (authChecked && isAuthenticated && user?.data?.email) {
-      console.log("Fetching offers"); // Debug log
+    if (isAuthChecked && isAuthenticated && user?.data?.email) {
+      console.log("Fetching offers");
       fetchOffers();
     }
-  }, [authChecked, isAuthenticated, user]);
+  }, [isAuthChecked, isAuthenticated, user]);
 
   const handleSignOffer = (offerLink, offerId) =>
     navigate("/sign-offer", { state: { offerLink, offerId, newtoken: token } });
@@ -85,6 +81,11 @@ const Dashboard = () => {
   };
 
   const confirmRejectOffer = async () => {
+    if (!token) {
+      setOffersError("No token found");
+      navigate("/login", { replace: true });
+      return;
+    }
     try {
       await axios.post(
         `${API_URL}/api/offer/offer/updateStatus`,
@@ -96,10 +97,10 @@ const Dashboard = () => {
       );
       fetchOffers();
     } catch (err) {
-      console.error("Reject offer error:", err.response?.data); // Debug log
+      console.error("Reject offer error:", err.response?.data);
       if (err.response?.status === 401) {
         setOffersError("Session expired. Please log in again.");
-        logout();
+        useAuthStore.getState().clearAuthState();
         navigate("/login", { replace: true });
       } else {
         setOffersError(err.response?.data?.message || "Failed to reject offer");
@@ -120,7 +121,7 @@ const Dashboard = () => {
     setSelectedDocumentUrl(null);
   };
 
-  if (!authChecked || loading || offersLoading) {
+  if (!isAuthChecked || loading || offersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
         <Loader />
@@ -203,7 +204,7 @@ const Dashboard = () => {
                     >
                       Retracted
                     </button>
-                  ): (
+                  ) : (
                     <button
                       onClick={() => handleViewFile(offer.acceptedLetter)}
                       className="mt-4 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"

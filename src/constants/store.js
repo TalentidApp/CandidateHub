@@ -14,13 +14,13 @@ const useAuthStore = create(
       error: null,
 
       login: async (credentials) => {
-        set({ loading: true, error: null, user: null, token: null, isAuthenticated: false });
+        set({ loading: true, error: null });
         try {
           const response = await axios.post(`${API_URL}/api/candidate/candidate-login`, credentials, {
             withCredentials: true,
           });
           const { token, ...userData } = response.data;
-          console.log("Login response:", { token, userData }); // Debug log
+          console.log("Login response:", { token, userData });
           set({
             user: userData,
             token,
@@ -29,9 +29,42 @@ const useAuthStore = create(
           });
           return true;
         } catch (error) {
-          console.error("Login error:", error.response?.data); // Debug log
+          console.error("Login error:", error.response?.data);
           set({
             error: error.response?.data?.message || "Login failed",
+            loading: false,
+          });
+          return false;
+        }
+      },
+
+      checkAuth: async () => {
+        const { token, isAuthenticated, user } = get();
+        if (isAuthenticated && token && user) {
+          console.log("Authenticated state restored, skipping API call");
+          return true;
+        }
+        set({ loading: true, error: null });
+        try {
+          const response = await axios.get(`${API_URL}/api/candidate/fetchCandidate`, {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          });
+          console.log("Check auth response:", response.data);
+          set({
+            user: response.data,
+            token,
+            isAuthenticated: true,
+            loading: false,
+          });
+          return true;
+        } catch (error) {
+          console.error("Check auth error:", error.response?.data);
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            error: error.response?.data?.message || "Session expired. Please log in again.",
             loading: false,
           });
           return false;
@@ -41,8 +74,8 @@ const useAuthStore = create(
       fetchCandidateDetails: async () => {
         const { token } = get();
         if (!token) {
-          console.warn("No token found for fetchCandidateDetails"); // Debug log
-          set({ isAuthenticated: false, error: "No token found", loading: false });
+          console.warn("No token found for fetchCandidateDetails");
+          set({ error: "No token found", loading: false });
           return;
         }
         set({ loading: true, error: null });
@@ -51,24 +84,17 @@ const useAuthStore = create(
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
           });
-          console.log("Fetch candidate response:", response.data); // Debug log
+          console.log("Fetch candidate response:", response.data);
           set({ user: response.data, loading: false });
         } catch (error) {
-          console.error("Fetch candidate error:", error.response?.data); // Debug log
-          if (error.response?.status === 401) {
-            set({
-              user: null,
-              token: null,
-              isAuthenticated: false,
-              error: "Session expired. Please log in again.",
-              loading: false,
-            });
-          } else {
-            set({
-              error: error.response?.data?.message || "Failed to fetch candidate details",
-              loading: false,
-            });
-          }
+          console.error("Fetch candidate error:", error.response?.data);
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            error: error.response?.data?.message || "Failed to fetch candidate details",
+            loading: false,
+          });
         }
       },
 
@@ -84,6 +110,7 @@ const useAuthStore = create(
               withCredentials: true,
             }
           );
+          console.log("Logout successful");
         } catch (error) {
           console.error("Logout error:", error);
         } finally {
@@ -98,7 +125,7 @@ const useAuthStore = create(
       },
 
       clearAuthState: () => {
-        console.log("Clearing auth state"); // Debug log
+        console.log("Clearing auth state");
         set({
           user: null,
           token: null,
@@ -110,8 +137,8 @@ const useAuthStore = create(
     }),
     {
       name: "auth-storage",
-      storage: localStorage,
     }
   )
 );
+
 export default useAuthStore;
