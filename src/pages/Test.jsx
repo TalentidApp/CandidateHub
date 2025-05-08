@@ -7,7 +7,7 @@ import useAuthStore from "../constants/store";
 const TestPage = () => {
   const { testId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, token, checkAuth } = useAuthStore();
+  const { isAuthenticated, token, checkAuth  , user} = useAuthStore();
   const [test, setTest] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -34,7 +34,6 @@ const TestPage = () => {
     verifyAuth();
   }, [isAuthenticated, token, checkAuth, navigate, testId]);
 
-  // Fetch test data from API
   const fetchTest = async () => {
     setIsLoading(true);
     setError(null);
@@ -67,28 +66,37 @@ const TestPage = () => {
     }
   };
 
-  // Handle answer selection
+  const checkFormulaStatus = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/formula/formula/status/${user?.data?.name}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      return response.data.hasSubmitted;
+    } catch (error) {
+      console.error("Error checking formula status:", error);
+      return false;
+    }
+  };
+
   const handleAnswerSelect = (option) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = option;
     setAnswers(newAnswers);
   };
 
-  // Navigate to next question
   const handleNextQuestion = () => {
     if (currentQuestion < (test?.questions?.length || 0) - 1) {
       setCurrentQuestion(currentQuestion + 1);
     }
   };
 
-  // Navigate to previous question
   const handlePreviousQuestion = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     }
   };
 
-  // Handle manual test submission
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
@@ -110,7 +118,14 @@ const TestPage = () => {
       );
       console.log("✅ Test submitted");
       toast.success("Test submitted successfully!");
-      navigate("/test/completed");
+
+      // Check if formula data is submitted
+      const hasSubmittedFormula = await checkFormulaStatus();
+      if (!hasSubmittedFormula) {
+        navigate("/formula");
+      } else {
+        navigate("/test/completed");
+      }
     } catch (error) {
       console.error("❌ Error submitting test:", error);
       if (error.response?.status === 401) {

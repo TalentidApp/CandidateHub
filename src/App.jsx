@@ -12,6 +12,7 @@ import useAuthStore from "./constants/store";
 import TestCompleted from "./pages/CompletedTest";
 import TestPage from "./pages/Test";
 import NotFound from "./pages/NotFound";
+import FormulaDocumentation from "./pages/Form";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
@@ -40,6 +41,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/test/:testId" element={<TestPage />} />
         <Route path="/test/completed" element={<TestCompleted />} />
+        <Route path="/formula" element={<FormulaDocumentation />} />
         <Route
           path="/dashboard"
           element={

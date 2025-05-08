@@ -164,6 +164,9 @@ const Header = () => {
                   <Link to="/profile" className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all">
                     <FaUserCircle className="mr-2 text-purple-600" /> My Profile
                   </Link>
+                  <Link to="/formula" className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all">
+                    <FaUserCircle className="mr-2 text-purple-600" /> Offer Preferences
+                  </Link>
                   <li className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all">
                     <FaCog className="mr-2 text-purple-600" /> Settings
                   </li>
