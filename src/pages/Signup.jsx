@@ -15,8 +15,9 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const API_URL = 'https://talentid-backend-v2.vercel.app';
-  
+
   async function submitHandler(data) {
+    if (!data.terms) return;
     setLoading(true);
     setError(null);
     try {
@@ -147,6 +148,24 @@ const Signup = () => {
                 <p className="text-red-500 text-sm">{errors.password.message}</p>
               )}
             </div>
+
+            <div className="flex items-start">
+              <input
+                type="checkbox"
+                id="terms"
+                {...register("terms", { required: "You must accept the terms and conditions" })}
+                className="mt-1 mr-2"
+              />
+              <label htmlFor="terms" className="text-sm text-gray-700">
+                I agree to the{" "}
+                <a href="/terms" target="_blank" className="text-[#652d96] underline">
+                  Terms and Conditions
+                </a>
+              </label>
+            </div>
+            {errors.terms && (
+              <p className="text-red-500 text-sm mt-1">{errors.terms.message}</p>
+            )}
 
             {/* Login Link */}
             <p className="mt-4 text-center text-sm text-gray-600">

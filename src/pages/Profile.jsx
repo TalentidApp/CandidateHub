@@ -1,18 +1,16 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
-import { FaEnvelope, FaUser, FaFileDownload, FaCode, FaBriefcase, FaSignOutAlt } from "react-icons/fa";
+import { FaEnvelope, FaUser, FaFileDownload, FaCode, FaBriefcase } from "react-icons/fa";
 
 const ProfilePage = () => {
-  const { user, loading, error, fetchCandidateDetails, logout } = useAuthStore();
-  const navigate = useNavigate();
-  
+  const { user, loading, error, fetchCandidateDetails } = useAuthStore();
+
 
   useEffect(() => {
     fetchCandidateDetails();
   }, [fetchCandidateDetails]);
 
-  console.log("User from store:", user); 
+  console.log("User from store:", user);
 
   if (loading) {
     return (
@@ -44,13 +42,6 @@ const ProfilePage = () => {
 
   const { email, name, resumeLink, skills = [], offers = [], createdAt } = user.data || {};
 
-  const handleLogout = async () => {
-    const success = await logout();
-    if (success) {
-      navigate("/login");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-gray-200 pt-20">
       <div className="max-w-5xl mx-auto p-6">
@@ -61,7 +52,7 @@ const ProfilePage = () => {
             </div>
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-4xl font-extrabold text-gray-800 mb-2 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                {!name  ? "Anonymous Candidate" : name}
+                {!name ? "Anonymous Candidate" : name}
               </h1>
               <div className="flex items-center justify-center md:justify-start gap-2 text-gray-600 mb-4">
                 <FaEnvelope className="text-purple-700" />
@@ -80,13 +71,6 @@ const ProfilePage = () => {
               )}
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition duration-300"
-          >
-            <FaSignOutAlt />
-            Logout
-          </button>
           <p className="text-sm text-gray-500 mt-4 text-center md:text-right">
             Joined: {createdAt ? new Date(createdAt).toLocaleDateString() : "N/A"}
           </p>
@@ -125,9 +109,8 @@ const ProfilePage = () => {
                   <p className="text-gray-600 text-sm mb-1">
                     Status:{" "}
                     <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        offer.status === "Pending" ? "bg-yellow-200" : "bg-green-200"
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs ${offer.status === "Pending" ? "bg-yellow-200" : "bg-green-200"
+                        }`}
                     >
                       {offer.status || "N/A"}
                     </span>
