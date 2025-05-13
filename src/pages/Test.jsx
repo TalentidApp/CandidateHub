@@ -16,7 +16,6 @@ const TestPage = () => {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
 
-  // Check authentication on mount
   useEffect(() => {
     const verifyAuth = async () => {
       if (isAuthenticated && token) {

@@ -28,6 +28,7 @@ const Login = () => {
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
+  const API_URL = 'https://talentid-backend-v2.vercel.app';
   const { isAuthenticated, login, fetchCandidateDetails, error: authError, clearAuthState } = useAuthStore();
 
   useEffect(() => {
