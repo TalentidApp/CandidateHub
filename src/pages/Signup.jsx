@@ -14,7 +14,6 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const API_URL = 'https://talentid-backend-v2.vercel.app';
 
   async function submitHandler(data) {
     if (!data.terms) return;
@@ -22,7 +21,7 @@ const Signup = () => {
     setError(null);
     try {
       const response = await axios.post(
-        `${API_URL}/api/candidate/candidate-signup`,
+        `https://talentid-backend-v2.vercel.app/api/candidate/candidate-signup`,
         {
           fullName: data.fullName,
           email: data.email,
