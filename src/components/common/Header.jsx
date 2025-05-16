@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaUserCircle, FaCog, FaSignOutAlt, FaTimes, FaSearch } from 'react-icons/fa';
-import { MdArrowDropDown } from "react-icons/md";
+import { FaUserCircle, FaCog, FaSignOutAlt, FaTimes, FaSearch, FaAngleDown, FaFileAlt } from 'react-icons/fa';
 import logo from '../../assets/logo.png';
 import useAuthStore from '../../constants/store';
 import { Link, useNavigate } from 'react-router-dom';
@@ -97,41 +96,39 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="flex items-center justify-between border-b px-6 py-4 md:px-8 ">
-      {/* Logo */}
+    <header className="flex items-center justify-between border-b border-purple-100 bg-transparent px-4 py-3 sm:px-6 lg:px-8 shadow-sm">
       <div className="flex items-center">
         <img
           src={logo}
           alt="TalentID Logo"
-          className="h-7 w-auto transform transition-all duration-300 cursor-pointer"
+          className="h-8 w-auto cursor-pointer transition-transform hover:scale-105"
           onClick={() => navigate('/')}
         />
       </div>
 
-      {/* Search and Profile */}
       {isAuthenticated && (
-        <div className="flex items-center gap-6">
-          {/* Search Bar */}
+        <div className="flex items-center gap-4 sm:gap-6">
           <div className="relative group" ref={searchRef}>
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 group-hover:text-purple-800 transition-all">
-              <FaSearch className="w-5 h-5" />
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#652d96] group-hover:text-[#4b2270] transition-colors">
+              <FaSearch className="w-4 h-4" />
             </span>
             <input
-              className="pl-10 pr-4 py-2 rounded-lg border border-purple-200 bg-purple-50 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:bg-white w-64 md:w-80 transition-all duration-300"
+              className="pl-10 pr-4 py-2 rounded-lg border border-purple-200 bg-purple-50 text-[#652d96] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#652d96] focus:bg-white w-full sm:w-64 md:w-80 transition-all duration-300"
               placeholder="Search companies..."
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={handleFocus}
+              aria-label="Search companies"
             />
             {filteredCompanies.length > 0 && (
-              <div className="absolute z-20 mt-2 w-full bg-white border border-purple-100 rounded-lg shadow-md max-h-60 overflow-y-auto transform scale-95 origin-top transition-all duration-200">
+              <div className="absolute z-20 mt-2 w-full bg-white border border-purple-100 rounded-lg shadow-lg max-h-60 overflow-y-auto animate-fade-in">
                 {filteredCompanies.map((company, index) => (
                   <div
                     key={index}
-                    className="p-3 hover:bg-purple-100 cursor-pointer text-gray-700 hover:text-purple-800 flex items-center gap-2 transition-all"
+                    className="p-3 hover:bg-purple-50 cursor-pointer text-[#652d96] hover:text-[#4b2270] flex items-center gap-2 transition-colors"
                     onClick={() => handleCompanyClick(company)}
                   >
-                    <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
+                    <span className="w-2 h-2 bg-[#652d96] rounded-full"></span>
                     {company.companyName}
                   </div>
                 ))}
@@ -141,37 +138,65 @@ const Header = () => {
 
           {/* Profile Dropdown */}
           <div className="relative flex items-center group" ref={profileRef}>
-            <FaUserCircle className="text-purple-600 text-2xl cursor-pointer group-hover:text-purple-800 transition-all duration-300" />
-            <MdArrowDropDown
-              size={28}
-              className="text-purple-600 cursor-pointer group-hover:text-purple-800 transition-all duration-300"
+            <FaUserCircle className="text-[#652d96] text-2xl cursor-pointer group-hover:text-[#4b2270] transition-colors" />
+            <FaAngleDown
+              className="text-[#652d96] text-2xl cursor-pointer group-hover:text-[#4b2270] transition-colors"
               onClick={toggleProfile}
+              aria-label="Toggle profile menu"
             />
             {showProfile && (
-              <div className="absolute z-40 right-0 top-full mt-3 w-64 bg-white border border-purple-100 rounded-lg shadow-md transform scale-95 origin-top-right transition-all duration-200">
+              <div className="absolute z-40 right-0 top-full mt-3 w-64 bg-white border border-purple-100 rounded-lg shadow-lg animate-fade-in">
                 <div className="flex justify-between items-center p-3 border-b border-purple-50">
-                  <p className="text-purple-700 font-semibold">My Account</p>
+                  <p className="text-[#652d96] font-semibold">My Account</p>
                   <FaTimes
-                    className="text-gray-500 cursor-pointer hover:text-red-500 transition-all"
+                    className="text-gray-500 cursor-pointer hover:text-red-500 transition-colors"
                     onClick={() => setShowProfile(false)}
+                    aria-label="Close profile menu"
                   />
                 </div>
                 <div className="p-3 text-center">
-                  <p className="text-purple-700 font-semibold">{user?.data?.name || "User"}</p>
-                  <p className="text-gray-500 text-sm">{user?.data?.email || ""}</p>
+                  <p className="text-[#652d96] font-semibold">{user?.data?.name || "User"}</p>
+                  <p className="text-gray-500 text-sm truncate">{user?.data?.email || ""}</p>
                 </div>
                 <ul className="space-y-1 p-2">
-                  <Link to="/profile" className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all">
-                    <FaUserCircle className="mr-2 text-purple-600" /> My Profile
-                  </Link>
-                  <Link to="/formula" className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all">
-                    <FaUserCircle className="mr-2 text-purple-600" /> Offer Preferences
-                  </Link>
-                  <li className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all">
-                    <FaCog className="mr-2 text-purple-600" /> Settings
+                  <li>
+                    <Link
+                      to="/profile"
+                      className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-[#4b2270] p-2 rounded-md transition-colors"
+                      onClick={() => setShowProfile(false)}
+                    >
+                      <FaUserCircle className="mr-2 text-[#652d96]" /> My Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/tests"
+                      className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-[#4b2270] p-2 rounded-md transition-colors"
+                      onClick={() => setShowProfile(false)}
+                    >
+                      <FaFileAlt className="mr-2 text-[#652d96]" /> Tests
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/formula"
+                      className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-[#4b2270] p-2 rounded-md transition-colors"
+                      onClick={() => setShowProfile(false)}
+                    >
+                      <FaCog className="mr-2 text-[#652d96]" /> Offer Preferences
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/settings"
+                      className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-[#4b2270] p-2 rounded-md transition-colors"
+                      onClick={() => setShowProfile(false)}
+                    >
+                      <FaCog className="mr-2 text-[#652d96]" /> Settings
+                    </Link>
                   </li>
                   <li
-                    className="flex items-center text-gray-700 hover:bg-purple-50 p-2 rounded-md cursor-pointer transition-all"
+                    className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-red-500 p-2 rounded-md cursor-pointer transition-colors"
                     onClick={handleLogout}
                   >
                     <FaSignOutAlt className="mr-2 text-red-500" />

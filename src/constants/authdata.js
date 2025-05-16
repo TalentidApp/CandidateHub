@@ -10,7 +10,6 @@ const useAuthDataStore = create((set) => ({
   loading: false,
   error: null,
 
-  // Set initial data from login response
   setAuthData: (data, token) => {
     set({
       user: data,
@@ -20,7 +19,6 @@ const useAuthDataStore = create((set) => ({
     });
   },
 
-  // Clear auth data on logout
   clearAuthData: () => {
     set({
       user: null,
@@ -30,7 +28,6 @@ const useAuthDataStore = create((set) => ({
     });
   },
 
-  // Fetch candidate details using the stored token
   fetchCandidateDetails: async () => {
     const { token } = useAuthDataStore.getState();
     set({ loading: true, error: null });

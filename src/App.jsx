@@ -7,12 +7,13 @@ import Login from "./pages/Login";
 import PropTypes from "prop-types";
 import CarrerPage from "./pages/CarrerPage";
 import SignUpOffer from "./pages/SignUpOffer";
-import Dashboard from "./pages/HomePage"; 
+import Dashboard from "./pages/HomePage";
 import useAuthStore from "./constants/store";
 import TestCompleted from "./pages/CompletedTest";
-import TestPage from "./pages/Test";
+import TestPage from "./pages/CandidateTest";
 import NotFound from "./pages/NotFound";
-import FormulaDocumentation from "./pages/Form";
+import JobPreferencesForm from "./pages/Form";
+import Tests from "./pages/Tests";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
@@ -41,7 +42,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/test/:testId" element={<TestPage />} />
         <Route path="/test/completed" element={<TestCompleted />} />
-        <Route path="/formula" element={<FormulaDocumentation />} />
+        <Route path="/formula" element={<JobPreferencesForm />} />
+        <Route path="/tests" element={<Tests />} />
         <Route
           path="/dashboard"
           element={
@@ -50,7 +52,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-      <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
