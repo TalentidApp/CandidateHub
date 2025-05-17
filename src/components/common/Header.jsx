@@ -130,11 +130,10 @@ const Header = () => {
             )}
           </div>
 
-          {/* Profile Dropdown */}
           <div className="relative flex items-center group" ref={profileRef}>
             <FaUserCircle className="text-[#652d96] text-2xl cursor-pointer group-hover:text-[#4b2270] transition-colors" />
             <FaAngleDown
-              className="text-[#652d96] text-2xl cursor-pointer group-hover:text-[#4b2270] transition-colors"
+              className="text-[#652d96] text-xl cursor-pointer group-hover:text-[#4b2270] transition-colors"
               onClick={toggleProfile}
               aria-label="Toggle profile menu"
             />
