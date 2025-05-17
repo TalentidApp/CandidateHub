@@ -1,60 +1,32 @@
-import { Route, Routes, Navigate } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import Profile from "./pages/Profile";
-import QuizPage from "./components/common/SingleQuiz";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import PropTypes from "prop-types";
-import CarrerPage from "./pages/CarrerPage";
-import SignUpOffer from "./pages/SignUpOffer";
-import Dashboard from "./pages/HomePage";
-import useAuthStore from "./constants/store";
-import TestCompleted from "./pages/CompletedTest";
+import {  Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 import TestPage from "./pages/CandidateTest";
-import NotFound from "./pages/NotFound";
+import CareerPage from "./pages/CarrerPage";
 import JobPreferencesForm from "./pages/Form";
+import Dashboard from "./pages/HomePage";
+import ProfilePage from "./pages/Profile";
 import Tests from "./pages/Tests";
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuthStore();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
-
-ProtectedRoute.propTypes = {
-  children: PropTypes.node.isRequired,
-};
+import Login from "./pages/Login";
+import SignOffer from "./pages/SignUpOffer";
 
 function App() {
   return (
-    <div className="w-screen min-h-screen">
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/career/:companyName" element={<CarrerPage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/singleQuiz" element={<QuizPage />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/sign-offer" element={<SignUpOffer />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/test/:testId" element={<TestPage />} />
-        <Route path="/test/completed" element={<TestCompleted />} />
-        <Route path="/formula" element={<JobPreferencesForm />} />
-        <Route path="/tests" element={<Tests />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/test/:testId" element={<TestPage />} />
+          <Route path="/career/:companyName" element={<CareerPage />} />
+          <Route path="/preferences" element={<JobPreferencesForm />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/tests" element={<Tests />} />
+          <Route path="/sign-offer" element={<SignOffer />} />
+          <Route path="/carrerpage" element={<CareerPage />} /> {/* Note: Possible typo in original path */}
+          <Route path="/test/completed" element={<Dashboard />} /> {/* Redirect to Dashboard for simplicity */}
+          <Route path="/formula" element={<JobPreferencesForm />} /> {/* Redirect to JobPreferencesForm */}
+          <Route path="/" element={<Dashboard />} /> {/* Default route */}
+        </Route>
       </Routes>
-    </div>
   );
 }
 

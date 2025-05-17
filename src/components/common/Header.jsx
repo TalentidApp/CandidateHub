@@ -3,7 +3,7 @@ import { FaUserCircle, FaCog, FaSignOutAlt, FaTimes, FaSearch, FaAngleDown, FaFi
 import logo from '../../assets/logo.png';
 import useAuthStore from '../../constants/store';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../lib/api';
 
 const Header = () => {
   const [showProfile, setShowProfile] = useState(false);
@@ -14,7 +14,6 @@ const Header = () => {
   const searchRef = useRef(null);
   const { user, logout, loading, error, isAuthenticated, token } = useAuthStore();
   const navigate = useNavigate();
-  const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
 
   const toggleProfile = () => setShowProfile(!showProfile);
 
@@ -32,12 +31,7 @@ const Header = () => {
         return;
       }
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/users/search-companies`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        });
+        const res = await api.get(`/api/users/search-companies`);
         setAllCompanies(res.data.data || []);
       } catch (err) {
         console.error("Fetch companies error:", err.response?.data);
@@ -184,15 +178,6 @@ const Header = () => {
                       onClick={() => setShowProfile(false)}
                     >
                       <FaCog className="mr-2 text-[#652d96]" /> Offer Preferences
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/settings"
-                      className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-[#4b2270] p-2 rounded-md transition-colors"
-                      onClick={() => setShowProfile(false)}
-                    >
-                      <FaCog className="mr-2 text-[#652d96]" /> Settings
                     </Link>
                   </li>
                   <li

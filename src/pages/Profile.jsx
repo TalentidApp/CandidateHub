@@ -5,7 +5,6 @@ import { FaEnvelope, FaUser, FaFileDownload, FaCode, FaBriefcase } from "react-i
 const ProfilePage = () => {
   const { user, loading, error, fetchCandidateDetails } = useAuthStore();
 
-
   useEffect(() => {
     fetchCandidateDetails();
   }, [fetchCandidateDetails]);
@@ -23,9 +22,7 @@ const ProfilePage = () => {
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-purple-100 to-gray-200">
-        <p className="text-red-600 text-lg font-semibold bg-white p-4 rounded-lg shadow-lg">
-          Error: {error}
-        </p>
+        <p className="text-red-600 text-lg font-semibold bg-white p-4 rounded-lg shadow-lg">Error: {error}</p>
       </div>
     );
   }
@@ -33,9 +30,7 @@ const ProfilePage = () => {
   if (!user) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-purple-100 to-gray-200">
-        <p className="text-gray-600 text-lg font-semibold bg-white p-4 rounded-lg shadow-lg">
-          No user data available.
-        </p>
+        <p className="text-gray-600 text-lg font-semibold bg-white p-4 rounded-lg shadow-lg">No user data available.</p>
       </div>
     );
   }
@@ -107,17 +102,9 @@ const ProfilePage = () => {
                 >
                   <h3 className="text-lg font-semibold text-purple-800">{offer.jobTitle}</h3>
                   <p className="text-gray-600 text-sm mb-1">
-                    Status:{" "}
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${offer.status === "Pending" ? "bg-yellow-200" : "bg-green-200"
-                        }`}
-                    >
-                      {offer.status || "N/A"}
-                    </span>
+                    Status: <span className={`px-2 py-1 rounded-full text-xs ${offer.status === "Pending" ? "bg-yellow-200" : "bg-green-200"}`}>{offer.status || "N/A"}</span>
                   </p>
-                  <p className="text-gray-600 text-sm">
-                    Expires: {new Date(offer.expirationDate).toLocaleDateString()}
-                  </p>
+                  <p className="text-gray-600 text-sm">Expires: {new Date(offer.expirationDate).toLocaleDateString()}</p>
                   <p className="text-gray-500 text-xs mt-2">
                     Received: {new Date(offer.offerDate || createdAt).toLocaleDateString()}
                   </p>

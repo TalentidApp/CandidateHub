@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/common/Header";
 import video from "../assets/v.mp4";
 import useAuthStore from "../constants/store";
-import axios from "axios";
 import Loader from "../components/common/Loader";
-
-const API_URL = 'https://talentid-backend-v2.vercel.app';
+import { api } from "../lib/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading, error, isAuthenticated, token, checkAuth } = useAuthStore();
+  const { user } = useAuthStore();
   const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
@@ -18,7 +16,6 @@ const Dashboard = () => {
   const [selectedDocumentUrl, setSelectedDocumentUrl] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [offerToReject, setOfferToReject] = useState(null);
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [isFeedbackPopupOpen, setIsFeedbackPopupOpen] = useState(false);
   const [feedbackOffer, setFeedbackOffer] = useState(null);
   const [feedbackRating, setFeedbackRating] = useState(1);
@@ -26,35 +23,11 @@ const Dashboard = () => {
   const [feedbackError, setFeedbackError] = useState(null);
   const [feedbackSuccess, setFeedbackSuccess] = useState(null);
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      if (isAuthenticated && token && user) {
-        setIsAuthChecked(true);
-        return;
-      }
-      const isValid = await checkAuth();
-      setIsAuthChecked(true);
-      if (!isValid) {
-        console.log("Redirecting to login due to invalid auth");
-        navigate("/login", { replace: true });
-      }
-    };
-    verifyAuth();
-  }, [isAuthenticated, token, user, checkAuth, navigate]);
-
   const fetchOffers = async () => {
-    if (!token) {
-      setOffersError("No token found");
-      navigate("/login", { replace: true });
-      return;
-    }
     setOffersLoading(true);
     setOffersError(null);
     try {
-      const response = await axios.get(`${API_URL}/api/offer/offers`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const response = await api.get("/api/offer/offers");
       console.log("Fetch offers response:", response.data);
       setOffers(response.data.data || []);
     } catch (err) {
@@ -72,14 +45,13 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (isAuthChecked && isAuthenticated && user?.data?.email) {
+    if (user?.data?.email) {
       console.log("Fetching offers");
       fetchOffers();
     }
-  }, [isAuthChecked, isAuthenticated, user]);
+  }, [user]);
 
-  const handleSignOffer = (offerLink, offerId) =>
-    navigate("/sign-offer", { state: { offerLink, offerId, newtoken: token } });
+  const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId } });
 
   const handleRejectOffer = async (offerId) => {
     setOfferToReject(offerId);
@@ -87,20 +59,8 @@ const Dashboard = () => {
   };
 
   const confirmRejectOffer = async () => {
-    if (!token) {
-      setOffersError("No token found");
-      navigate("/login", { replace: true });
-      return;
-    }
     try {
-      await axios.post(
-        `${API_URL}/api/offer/offer/updateStatus`,
-        { offerId: offerToReject, status: "Declined" },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await api.post("/api/offer/offer/updateStatus", { offerId: offerToReject, status: "Declined" });
       fetchOffers();
     } catch (err) {
       console.error("Reject offer error:", err.response?.data);
@@ -142,11 +102,6 @@ const Dashboard = () => {
   };
 
   const handleSubmitFeedback = async () => {
-    if (!token) {
-      setFeedbackError("No token found");
-      navigate("/login", { replace: true });
-      return;
-    }
     if (!feedbackOffer?.hr) {
       setFeedbackError("Recruiter information not available");
       return;
@@ -154,21 +109,14 @@ const Dashboard = () => {
     setFeedbackError(null);
     setFeedbackSuccess(null);
     try {
-      await axios.post(
-        `http://localhost:4000/api/feedback/submit`,
-        {
-          reviewerId: user.data._id,
-          reviewerModel: "HiringCandidate",
-          recipientId: feedbackOffer.hr,
-          recipientModel: "User",
-          rating: feedbackRating,
-          comment: feedbackComment,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await api.post("/api/feedback/submit", {
+        reviewerId: user.data._id,
+        reviewerModel: "HiringCandidate",
+        recipientId: feedbackOffer.hr,
+        recipientModel: "User",
+        rating: feedbackRating,
+        comment: feedbackComment,
+      });
       setFeedbackSuccess("Feedback submitted successfully!");
       setTimeout(() => {
         handleCloseFeedbackPopup();
@@ -185,7 +133,7 @@ const Dashboard = () => {
     }
   };
 
-  if (!isAuthChecked || loading || offersLoading) {
+  if (offersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
         <Loader />
@@ -193,10 +141,10 @@ const Dashboard = () => {
     );
   }
 
-  if (error || offersError) {
+  if (offersError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
-        <div className="text-red-500 text-xl font-semibold">{error || offersError}</div>
+        <div className="text-red-500 text-xl font-semibold">{offersError}</div>
       </div>
     );
   }
@@ -209,9 +157,7 @@ const Dashboard = () => {
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
             Hey <span className="text-[#652d96]">{user?.data?.name || "User"}</span>, Your Career Hub!
           </h2>
-          <p className="mt-2 text-lg">
-            Discover offers, connect with companies, and take charge.
-          </p>
+          <p className="mt-2 text-lg">Discover offers, connect with companies, and take charge.</p>
         </div>
 
         <div className="relative flex flex-col md:flex-row gap-8">
@@ -223,19 +169,13 @@ const Dashboard = () => {
                   className="relative bg-white/30 rounded-xl p-6 transform hover:-translate-y-2 transition-all duration-300 shadow-md hover:shadow-lg border border-indigo-100 group"
                 >
                   <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#652d96] rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
-                  <h3 className="font-semibold text-xl text-[#652d96] transition-all">
-                    {offer.jobTitle}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {offer.hr?.company || "Talentid.app"}
-                  </p>
+                  <h3 className="font-semibold text-xl text-[#652d96] transition-all">{offer.jobTitle}</h3>
+                  <p className="text-sm text-gray-600 mt-1">{offer.hr?.company || "Talentid.app"}</p>
                   <div className="mt-3 space-y-1">
                     <p className="text-sm text-gray-500">
                       Status: <span className="font-medium text-indigo-600">{offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
                     </p>
-                    <p className="text-sm text-gray-500">
-                      Offered: {new Date(offer.offerDate).toLocaleDateString()}
-                    </p>
+                    <p className="text-sm text-gray-500">Offered: {new Date(offer.offerDate).toLocaleDateString()}</p>
                     <p className="text-sm text-gray-500">
                       Joining: {offer.joiningDate ? new Date(offer.joiningDate).toLocaleDateString() : "N/A"}
                     </p>
@@ -258,10 +198,7 @@ const Dashboard = () => {
                       </>
                     ) : offer.status === "Declined" ? (
                       <>
-                        <button
-                          className="px-5 py-2 bg-red-500 text-white rounded-lg cursor-default"
-                          disabled
-                        >
+                        <button className="px-5 py-2 bg-red-500 text-white rounded-lg cursor-default" disabled>
                           Rejected
                         </button>
                         <button
@@ -273,11 +210,7 @@ const Dashboard = () => {
                       </>
                     ) : offer.status === "Retracted" ? (
                       <>
-                        <button
-                          className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200"
-                        >
-                          Retracted
-                        </button>
+                        <button className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">Retracted</button>
                         <button
                           onClick={() => handleOpenFeedbackPopup(offer)}
                           className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
@@ -307,11 +240,9 @@ const Dashboard = () => {
             ) : (
               <div className="bg-white rounded-xl p-6 shadow-md border border-indigo-100 text-center">
                 <h3 className="font-semibold text-xl text-[#652d96]">No Offers Yet</h3>
-                <p className="text-gray-600 mt-2">
-                  Search companies and unlock new opportunities!
-                </p>
+                <p className="text-gray-600 mt-2">Search companies and unlock new opportunities!</p>
                 <button
-                  onClick={() => navigate("/carrerpage")}
+                  onClick={() => navigate("/career")}
                   className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
                 >
                   Explore Now
@@ -322,12 +253,7 @@ const Dashboard = () => {
 
           <div className="w-full md:w-1/3 md:sticky md:top-20 self-start">
             <div className="relative">
-              <video
-                className="w-full rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
-                controls
-                autoPlay
-                muted
-              >
+              <video className="w-full rounded-xl shadow-md hover:shadow-lg transition-all duration-300" controls autoPlay muted>
                 <source src={video} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
@@ -362,9 +288,7 @@ const Dashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <h3 className="text-xl font-semibold text-[#652d96] mb-4">Confirm Rejection</h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to reject this offer? This action cannot be undone.
-            </p>
+            <p className="text-gray-600 mb-6">Are you sure you want to reject this offer? This action cannot be undone.</p>
             <div className="flex gap-4 justify-end">
               <button
                 onClick={() => setIsConfirmOpen(false)}
@@ -402,7 +326,9 @@ const Dashboard = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 >
                   {[1, 2, 3, 4, 5].map((num) => (
-                    <option key={num} value={num}>{num}</option>
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -417,12 +343,8 @@ const Dashboard = () => {
                   placeholder="Share your feedback about the recruiter..."
                 />
               </div>
-              {feedbackError && (
-                <p className="text-red-500 text-sm">{feedbackError}</p>
-              )}
-              {feedbackSuccess && (
-                <p className="text-green-500 text-sm">{feedbackSuccess}</p>
-              )}
+              {feedbackError && <p className="text-red-500 text-sm">{feedbackError}</p>}
+              {feedbackSuccess && <p className="text-green-500 text-sm">{feedbackSuccess}</p>}
               <div className="flex gap-4 justify-end">
                 <button
                   onClick={handleCloseFeedbackPopup}

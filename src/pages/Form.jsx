@@ -1,40 +1,32 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import axios from "axios";
 import useAuthStore from "../constants/store";
+import { api } from "../lib/api";
+import Header from "../components/common/Header";
 
 const cities = [
-  "Agra", "Ahmedabad", "Ajmer", "Akola", "Aligarh", "Allahabad", "Ambattur", 
-  "Amravati", "Amritsar", "Asansol", "Aurangabad", "Bangalore", "Bareilly", 
-  "Belgaum", "Bellary", "Berhampur", "Bhavnagar", "Bhiwandi", "Bhilai", 
-  "Bhopal", "Bhubaneswar", "Bikaner", "Bilaspur", "Chandigarh", "Chennai", 
-  "Coimbatore", "Cuttack", "Davanagere", "Dehradun", "Delhi", "Dhanbad", 
-  "Durgapur", "Erode", "Faridabad", "Firozabad", "Gaya", "Ghaziabad", 
-  "Gorakhpur", "Gulbarga", "Guntur", "Gurgaon", "Guwahati", "Gwalior", 
-  "Howrah", "Hubli-Dharwad", "Hyderabad", "Indore", "Jabalpur", "Jaipur", 
-  "Jalandhar", "Jalgaon", "Jammu", "Jamnagar", "Jamshedpur", "Jhansi", 
-  "Jodhpur", "Kakinada", "Kalyan-Dombivli", "Kanpur", "Kochi", "Kolhapur", 
-  "Kolkata", "Kollam", "Kota", "Kozhikode", "Kurnool", "Lucknow", "Ludhiana", 
-  "Madurai", "Maheshtala", "Malegaon", "Mangalore", "Meerut", "Moradabad", 
-  "Mumbai", "Muzaffarpur", "Mysore", "Nagpur", "Nanded", "Nashik", 
-  "Navi Mumbai", "Nellore", "Noida", "Patna", "Pimpri-Chinchwad", "Pune", 
-  "Raipur", "Rajahmundry", "Rajkot", "Ranchi", "Rourkela", "Saharanpur", 
-  "Salem", "Sangli-Miraj & Kupwad", "Shimla", "Siliguri", "Solapur", 
-  "Srinagar", "Surat", "Thane", "Thrissur", "Tiruchirappalli", "Tirunelveli", 
-  "Tiruppur", "Udaipur", "Ujjain", "Ulhasnagar", "Vadodara", "Varanasi", 
-  "Vasai-Virar", "Vijayawada", "Visakhapatnam", "Warangal"
+  "Agra", "Ahmedabad", "Ajmer", "Akola", "Aligarh", "Allahabad", "Ambattur", "Amravati", "Amritsar", "Asansol",
+  "Aurangabad", "Bangalore", "Bareilly", "Belgaum", "Bellary", "Berhampur", "Bhavnagar", "Bhiwandi", "Bhilai",
+  "Bhopal", "Bhubaneswar", "Bikaner", "Bilaspur", "Chandigarh", "Chennai", "Coimbatore", "Cuttack", "Davanagere",
+  "Dehradun", "Delhi", "Dhanbad", "Durgapur", "Erode", "Faridabad", "Firozabad", "Gaya", "Ghaziabad", "Gorakhpur",
+  "Gulbarga", "Guntur", "Gurgaon", "Guwahati", "Gwalior", "Howrah", "Hubli-Dharwad", "Hyderabad", "Indore", "Jabalpur",
+  "Jaipur", "Jalandhar", "Jalgaon", "Jammu", "Jamnagar", "Jamshedpur", "Jhansi", "Jodhpur", "Kakinada",
+  "Kalyan-Dombivli", "Kanpur", "Kochi", "Kolhapur", "Kolkata", "Kollam", "Kota", "Kozhikode", "Kurnool", "Lucknow",
+  "Ludhiana", "Madurai", "Maheshtala", "Malegaon", "Mangalore", "Meerut", "Moradabad", "Mumbai", "Muzaffarpur",
+  "Mysore", "Nagpur", "Nanded", "Nashik", "Navi Mumbai", "Nellore", "Noida", "Patna", "Pimpri-Chinchwad", "Pune",
+  "Raipur", "Rajahmundry", "Rajkot", "Ranchi", "Rourkela", "Saharanpur", "Salem", "Sangli-Miraj & Kupwad", "Shimla",
+  "Siliguri", "Solapur", "Srinagar", "Surat", "Thane", "Thrissur", "Tiruchirappalli", "Tirunelveli", "Tiruppur",
+  "Udaipur", "Ujjain", "Ulhasnagar", "Vadodara", "Varanasi", "Vasai-Virar", "Vijayawada", "Visakhapatnam", "Warangal"
 ];
 
 const companySizes = ["1-50", "51-200", "201-500", "501-1000", "1001+"];
 const roles = [
-  "Backend Developer", "Business Analyst", "Cloud Architect", "Content Strategist", 
-  "Cybersecurity Specialist", "Data Engineer", "Data Scientist", "Database Administrator", 
-  "Designer", "DevOps Engineer", "Financial Analyst", "Frontend Developer", 
-  "Full Stack Developer", "HR Specialist", "Machine Learning Engineer", 
-  "Marketing Specialist", "Mobile Developer", "Network Engineer", "Operations Manager", 
-  "Product Manager", "QA Engineer", "Sales Manager", "Software Engineer", 
-  "UI/UX Designer", "Other"
+  "Backend Developer", "Business Analyst", "Cloud Architect", "Content Strategist", "Cybersecurity Specialist",
+  "Data Engineer", "Data Scientist", "Database Administrator", "Designer", "DevOps Engineer", "Financial Analyst",
+  "Frontend Developer", "Full Stack Developer", "HR Specialist", "Machine Learning Engineer", "Marketing Specialist",
+  "Mobile Developer", "Network Engineer", "Operations Manager", "Product Manager", "QA Engineer", "Sales Manager",
+  "Software Engineer", "UI/UX Designer", "Other"
 ];
 
 const SearchableSelect = ({ options, value, onChange, placeholder, name, index }) => {
@@ -44,10 +36,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, index }
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-  // eslint-disable-next-line react/prop-types
-  const filteredOptions = options.filter(option =>
-    option.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredOptions = options.filter((option) => option.toLowerCase().includes(search.toLowerCase()));
 
   const handleSelect = (option) => {
     onChange({ target: { value: option } });
@@ -79,10 +68,10 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, index }
       setFocusedIndex(-1);
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setFocusedIndex(prev => (prev < filteredOptions.length - 1 ? prev + 1 : prev));
+      setFocusedIndex((prev) => (prev < filteredOptions.length - 1 ? prev + 1 : prev));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setFocusedIndex(prev => (prev > 0 ? prev - 1 : prev));
+      setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
     } else if (e.key === "Enter" && focusedIndex >= 0) {
       e.preventDefault();
       handleSelect(filteredOptions[focusedIndex]);
@@ -158,47 +147,29 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name, index }
 
 const JobPreferencesForm = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, token, checkAuth, user } = useAuthStore();
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     locationPreferences: ["", "", "", ""],
     expectedCTC: "",
     companySizePreferences: ["", "", "", ""],
     rolePreferences: ["", "", "", ""],
-    customRole: ""
+    customRole: "",
   });
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      if (isAuthenticated && token) {
-        setIsAuthChecked(true);
-        return;
-      }
-      const isValid = await checkAuth();
-      setIsAuthChecked(true);
-      if (!isValid) {
-        console.log("Not authenticated, redirecting to login from JobPreferencesForm");
-        localStorage.setItem('redirectAfterLogin', '/preferences');
-        navigate("/login", { replace: true });
-      }
-    };
-    verifyAuth();
-  }, [isAuthenticated, token, checkAuth, navigate]);
-
   const validateForm = () => {
     const newErrors = {};
-    if (formData.locationPreferences.some(pref => !pref)) {
+    if (formData.locationPreferences.some((pref) => !pref)) {
       newErrors.locationPreferences = "Please select all location preferences";
     }
     if (!formData.expectedCTC || isNaN(formData.expectedCTC) || formData.expectedCTC <= 0) {
       newErrors.expectedCTC = "Please enter a valid expected CTC (in USD)";
     }
-    if (formData.companySizePreferences.some(pref => !pref)) {
+    if (formData.companySizePreferences.some((pref) => !pref)) {
       newErrors.companySizePreferences = "Please select all company size preferences";
     }
-    if (formData.rolePreferences.some(pref => !pref)) {
+    if (formData.rolePreferences.some((pref) => !pref)) {
       newErrors.rolePreferences = "Please select all role preferences";
     }
     if (formData.rolePreferences.includes("Other") && !formData.customRole.trim()) {
@@ -210,33 +181,32 @@ const JobPreferencesForm = () => {
 
   const validateCTC = (value) => {
     if (!value || isNaN(value) || value <= 0) {
-      setErrors(prev => ({ ...prev, expectedCTC: "Please enter a valid expected CTC (in USD)" }));
+      setErrors((prev) => ({ ...prev, expectedCTC: "Please enter a valid expected CTC (in USD)" }));
     } else {
-      setErrors(prev => ({ ...prev, expectedCTC: undefined }));
+      setErrors((prev) => ({ ...prev, expectedCTC: undefined }));
     }
   };
 
   const handleChange = (e, field, index) => {
     const value = e.target.value;
-    setFormData(prev => {
+    setFormData((prev) => {
       const updatedField = [...prev[field]];
       updatedField[index] = value;
       return { ...prev, [field]: updatedField };
     });
-    // Clear errors for the field when updated
-    setErrors(prev => ({ ...prev, [field]: undefined }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const handleCTCChange = (e) => {
     const value = e.target.value;
-    setFormData(prev => ({ ...prev, expectedCTC: value }));
+    setFormData((prev) => ({ ...prev, expectedCTC: value }));
   };
 
   const handleCustomRoleChange = (e) => {
     const value = e.target.value;
-    setFormData(prev => ({ ...prev, customRole: value }));
+    setFormData((prev) => ({ ...prev, customRole: value }));
     if (value.trim()) {
-      setErrors(prev => ({ ...prev, customRole: undefined }));
+      setErrors((prev) => ({ ...prev, customRole: undefined }));
     }
   };
 
@@ -248,24 +218,17 @@ const JobPreferencesForm = () => {
     }
     setIsLoading(true);
     try {
-      await axios.post(
-        'https://talentid-backend-v2.vercel.app/api/formula/formula',
-        {
-          candidateId: user?.data?._id,
-          ...formData,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await api.post("/api/formula/formula", {
+        candidateId: user?.data?._id,
+        ...formData,
+      });
       toast.success("Preferences saved successfully!");
       navigate("/dashboard");
     } catch (error) {
       console.error("Error saving preferences data:", error);
       if (error.response?.status === 401) {
         useAuthStore.getState().clearAuthState();
-        localStorage.setItem('redirectAfterLogin', '/preferences');
+        localStorage.setItem("redirectAfterLogin", "/preferences");
         navigate("/login", { replace: true });
       } else {
         toast.error(error.response?.data?.message || "Failed to save preferences");
@@ -275,50 +238,20 @@ const JobPreferencesForm = () => {
     }
   };
 
-  if (!isAuthChecked) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-purple-200 to-purple-300 flex items-center justify-center py-10">
-        <svg
-          className="animate-spin h-12 w-12 text-indigo-600"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-      </div>
-    );
-  }
-
   return (
+    <>
+      <Header/>
     <div className="min-h-screen bg-gradient-to-br from-white via-purple-200 to-purple-300 text-gray-800 flex items-center justify-center py-12">
       <div className="w-full max-w-5xl mx-auto px-6 py-10 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold text-[#652d96] mb-6 text-center">Job Preferences</h2>
-        <p className="text-gray-600 mb-8 text-center">
-          Customize your job preferences to receive personalized job recommendations that align with your career goals.
-        </p>
+        <p className="text-gray-600 mb-8 text-center">Customize your job preferences to receive personalized job recommendations that align with your career goals.</p>
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Location Preferences */}
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Location Preferences</h3>
             <p className="text-sm text-gray-500 mb-4">Select your top 4 preferred cities in India.</p>
             {formData.locationPreferences.map((pref, index) => (
               <div key={index} className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preference {index + 1}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preference {index + 1}</label>
                 <SearchableSelect
                   options={cities}
                   value={pref}
@@ -327,14 +260,11 @@ const JobPreferencesForm = () => {
                   name="city"
                   index={index}
                 />
-                {errors.locationPreferences && index === 0 && (
-                  <p className="text-red-500 text-sm mt-1">{errors.locationPreferences}</p>
-                )}
+                {errors.locationPreferences && index === 0 && <p className="text-red-500 text-sm mt-1">{errors.locationPreferences}</p>}
               </div>
             ))}
           </div>
 
-          {/* Expected CTC */}
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Expected CTC</h3>
             <p className="text-sm text-gray-500 mb-4">Enter your expected annual compensation (in USD).</p>
@@ -348,9 +278,7 @@ const JobPreferencesForm = () => {
               min="0"
               aria-label="Expected CTC in USD"
             />
-            {errors.expectedCTC && (
-              <p className="text-red-500 text-sm mt-1">{errors.expectedCTC}</p>
-            )}
+            {errors.expectedCTC && <p className="text-red-500 text-sm mt-1">{errors.expectedCTC}</p>}
           </div>
 
           {/* Company Size Preferences */}
@@ -359,9 +287,7 @@ const JobPreferencesForm = () => {
             <p className="text-sm text-gray-500 mb-4">Select your top 4 preferred company sizes (employee count).</p>
             {formData.companySizePreferences.map((pref, index) => (
               <div key={index} className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preference {index + 1}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preference {index + 1}</label>
                 <select
                   value={pref}
                   onChange={(e) => handleChange(e, "companySizePreferences", index)}
@@ -369,13 +295,13 @@ const JobPreferencesForm = () => {
                   aria-label={`Select company size for preference ${index + 1}`}
                 >
                   <option value="">Select a size</option>
-                  {companySizes.map(size => (
-                    <option key={size} value={size}>{size}</option>
+                  {companySizes.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
                   ))}
                 </select>
-                {errors.companySizePreferences && index === 0 && (
-                  <p className="text-red-500 text-sm mt-1">{errors.companySizePreferences}</p>
-                )}
+                {errors.companySizePreferences && index === 0 && <p className="text-red-500 text-sm mt-1">{errors.companySizePreferences}</p>}
               </div>
             ))}
           </div>
@@ -385,9 +311,7 @@ const JobPreferencesForm = () => {
             <p className="text-sm text-gray-500 mb-4">Select your top 4 preferred roles or specify a custom role.</p>
             {formData.rolePreferences.map((pref, index) => (
               <div key={index} className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preference {index + 1}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Preference {index + 1}</label>
                 <SearchableSelect
                   options={roles}
                   value={pref}
@@ -406,12 +330,8 @@ const JobPreferencesForm = () => {
                     aria-label="Specify custom role"
                   />
                 )}
-                {errors.rolePreferences && index === 0 && (
-                  <p className="text-red-500 text-sm mt-1">{errors.rolePreferences}</p>
-                )}
-                {pref === "Other" && errors.customRole && (
-                  <p className="text-red-500 text-sm mt-1">{errors.customRole}</p>
-                )}
+                {errors.rolePreferences && index === 0 && <p className="text-red-500 text-sm mt-1">{errors.rolePreferences}</p>}
+                {pref === "Other" && errors.customRole && <p className="text-red-500 text-sm mt-1">{errors.customRole}</p>}
               </div>
             ))}
           </div>
@@ -430,14 +350,7 @@ const JobPreferencesForm = () => {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -453,6 +366,7 @@ const JobPreferencesForm = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

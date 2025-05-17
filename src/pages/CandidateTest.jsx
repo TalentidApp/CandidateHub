@@ -1,47 +1,25 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import axios from "axios";
 import useAuthStore from "../constants/store";
+import { api } from "../lib/api";
 
 const TestPage = () => {
   const { testId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, token, checkAuth  , user} = useAuthStore();
+  const { user } = useAuthStore();
   const [test, setTest] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
-  const API_BASE_URL = 'https://talentid-backend-v2.vercel.app';
-
-  useEffect(() => {
-    const verifyAuth = async () => {
-      if (isAuthenticated && token) {
-        setIsAuthChecked(true);
-        return;
-      }
-      const isValid = await checkAuth();
-      setIsAuthChecked(true);
-      if (!isValid) {
-        console.log("Not authenticated, redirecting to login from TestPage");
-        localStorage.setItem('redirectAfterLogin', `/test/${testId}`);
-        navigate("/login", { replace: true });
-      }
-    };
-    verifyAuth();
-  }, [isAuthenticated, token, checkAuth, navigate, testId]);
 
   const fetchTest = async () => {
     setIsLoading(true);
     setError(null);
     try {
       console.log(`🚀 Fetching test with testId: ${testId}`);
-      const response = await axios.get(`${API_BASE_URL}/api/offer/test/${testId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const response = await api.get(`/api/offer/test/${testId}`);
       console.log("✅ API response:", response.data);
       if (!response.data.test) {
         throw new Error("Test data not found in response");
@@ -54,7 +32,7 @@ const TestPage = () => {
       if (error.response?.status === 401) {
         setError("Session expired. Please log in again.");
         useAuthStore.getState().clearAuthState();
-        localStorage.setItem('redirectAfterLogin', `/test/${testId}`);
+        localStorage.setItem("redirectAfterLogin", `/test/${testId}`);
         navigate("/login", { replace: true });
       } else {
         setError(error.response?.data?.error || "Failed to load test. Please try again.");
@@ -67,10 +45,7 @@ const TestPage = () => {
 
   const checkFormulaStatus = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/formula/formula/status/${user?.data?.name}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const response = await api.get(`/api/formula/formula/status/${user?.data?.name}`);
       return response.data.hasSubmitted;
     } catch (error) {
       console.error("Error checking formula status:", error);
@@ -104,21 +79,13 @@ const TestPage = () => {
         selectedOption: answer,
       }));
       console.log("📤 Submitting test with answers:", formattedAnswers);
-      await axios.post(
-        `${API_BASE_URL}/api/offer/submit-test`,
-        {
-          testId,
-          answers: formattedAnswers,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await api.post("/api/offer/submit-test", {
+        testId,
+        answers: formattedAnswers,
+      });
       console.log("✅ Test submitted");
       toast.success("Test submitted successfully!");
 
-      // Check if formula data is submitted
       const hasSubmittedFormula = await checkFormulaStatus();
       if (!hasSubmittedFormula) {
         navigate("/formula");
@@ -130,7 +97,7 @@ const TestPage = () => {
       if (error.response?.status === 401) {
         setError("Session expired. Please log in again.");
         useAuthStore.getState().clearAuthState();
-        localStorage.setItem('redirectAfterLogin', `/test/${testId}`);
+        localStorage.setItem("redirectAfterLogin", `/test/${testId}`);
         navigate("/login", { replace: true });
       } else {
         toast.error("Failed to submit test. Please try again.");
@@ -140,14 +107,11 @@ const TestPage = () => {
     }
   };
 
-  // Fetch test data when authenticated
   useEffect(() => {
-    if (isAuthChecked && isAuthenticated && token) {
-      fetchTest();
-    }
-  }, [isAuthChecked, isAuthenticated, token]);
+    fetchTest();
+  }, [testId]);
 
-  if (!isAuthChecked || (isLoading && !test)) {
+  if (isLoading && !test) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-purple-200 to-purple-300 text-gray-800">
         <div className="flex flex-col items-center">
