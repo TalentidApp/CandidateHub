@@ -15,7 +15,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route path="/signup" element= {<Signup />} />
       <Route path="*" element={<NotFound />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/test/:testId" element={<TestPage />} />

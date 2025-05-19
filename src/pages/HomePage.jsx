@@ -22,6 +22,8 @@ const Dashboard = () => {
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackError, setFeedbackError] = useState(null);
   const [feedbackSuccess, setFeedbackSuccess] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const offersPerPage = 8;
 
   const fetchOffers = async () => {
     setOffersLoading(true);
@@ -133,6 +135,15 @@ const Dashboard = () => {
     }
   };
 
+  const indexOfLastOffer = currentPage * offersPerPage;
+  const indexOfFirstOffer = indexOfLastOffer - offersPerPage;
+  const currentOffers = offers.slice(indexOfFirstOffer, indexOfLastOffer);
+  const totalPages = Math.ceil(offers.length / offersPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   if (offersLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
@@ -162,81 +173,114 @@ const Dashboard = () => {
 
         <div className="relative flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-2/3 space-y-6">
-            {offers.length > 0 ? (
-              offers.map((offer) => (
-                <div
-                  key={offer._id}
-                  className="relative bg-white/30 rounded-xl p-6 transform hover:-translate-y-2 transition-all duration-300 shadow-md hover:shadow-lg border border-indigo-100 group"
-                >
-                  <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#652d96] rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
-                  <h3 className="font-semibold text-xl text-[#652d96] transition-all">{offer.jobTitle}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{offer.hr?.company || "Talentid.app"}</p>
-                  <div className="mt-3 space-y-1">
-                    <p className="text-sm text-gray-500">
-                      Status: <span className="font-medium text-indigo-600">{offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
-                    </p>
-                    <p className="text-sm text-gray-500">Offered: {new Date(offer.offerDate).toLocaleDateString()}</p>
-                    <p className="text-sm text-gray-500">
-                      Joining: {offer.joiningDate ? new Date(offer.joiningDate).toLocaleDateString() : "N/A"}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 mt-4">
-                    {offer.status === "Pending" ? (
-                      <>
-                        <button
-                          onClick={() => handleSignOffer(offer.offerLink || offer.offerLetterLink, offer._id)}
-                          className="px-5 py-2 bg-[#652d96] text-white rounded-lg hover:scale-105 transition-all duration-200"
-                        >
-                          Sign Now
-                        </button>
-                        <button
-                          onClick={() => handleRejectOffer(offer._id)}
-                          className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 hover:scale-105 transition-all duration-200"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : offer.status === "Declined" ? (
-                      <>
-                        <button className="px-5 py-2 bg-red-500 text-white rounded-lg cursor-default" disabled>
-                          Rejected
-                        </button>
-                        <button
-                          onClick={() => handleOpenFeedbackPopup(offer)}
-                          className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
-                        >
-                          Write Feedback
-                        </button>
-                      </>
-                    ) : offer.status === "Retracted" ? (
-                      <>
-                        <button className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">Retracted</button>
-                        <button
-                          onClick={() => handleOpenFeedbackPopup(offer)}
-                          className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
-                        >
-                          Write Feedback
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleViewFile(offer.acceptedLetter)}
-                          className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
-                        >
-                          View File
-                        </button>
-                        <button
-                          onClick={() => handleOpenFeedbackPopup(offer)}
-                          className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
-                        >
-                          Write Feedback
-                        </button>
-                      </>
-                    )}
-                  </div>
+            {currentOffers.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {currentOffers.map((offer) => (
+                    <div
+                      key={offer._id}
+                      className="relative bg-white/30 rounded-xl p-6 transform hover:-translate-y-2 transition-all duration-300 shadow-md hover:shadow-lg border border-indigo-100 group"
+                    >
+                      <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#652d96] rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
+                      <h3 className="font-semibold text-xl text-[#652d96] transition-all">{offer.jobTitle}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{offer.hr?.company || "Talentid.app"}</p>
+                      <div className="mt-3 space-y-1">
+                        <p className="text-sm text-gray-500">
+                          Status: <span className="font-medium text-indigo-600">{offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
+                        </p>
+                        <p className="text-sm text-gray-500">Offered: {new Date(offer.offerDate).toLocaleDateString()}</p>
+                        <p className="text-sm text-gray-500">
+                          Joining: {offer.joiningDate ? new Date(offer.joiningDate).toLocaleDateString() : "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex gap-3 mt-4">
+                        {offer.status === "Pending" ? (
+                          <>
+                            <button
+                              onClick={() => handleSignOffer(offer.offerLink || offer.offerLetterLink, offer._id)}
+                              className="px-5 py-2 bg-[#652d96] text-white rounded-lg hover:scale-105 transition-all duration-200"
+                            >
+                              Sign Now
+                            </button>
+                            <button
+                              onClick={() => handleRejectOffer(offer._id)}
+                              className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 hover:scale-105 transition-all duration-200"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        ) : offer.status === "Declined" ? (
+                          <>
+                            <button className="px-5 py-2 bg-red-500 text-white rounded-lg cursor-default" disabled>
+                              Rejected
+                            </button>
+                            <button
+                              onClick={() => handleOpenFeedbackPopup(offer)}
+                              className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                            >
+                              Write Feedback
+                            </button>
+                          </>
+                        ) : offer.status === "Retracted" ? (
+                          <>
+                            <button className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">Retracted</button>
+                            <button
+                              onClick={() => handleOpenFeedbackPopup(offer)}
+                              className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                            >
+                              Write Feedback
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleViewFile(offer.acceptedLetter)}
+                              className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                            >
+                              View File
+                            </button>
+                            <button
+                              onClick={() => handleOpenFeedbackPopup(offer)}
+                              className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                            >
+                              Write Feedback
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-4 mt-9">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-lg ${currentPage === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-[#652d96] text-white hover:bg-[#652d96c9]"} transition-all`}
+                    >
+                      Previous
+                    </button>
+                    <div className="flex gap-2">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-4 py-2 rounded-lg ${currentPage === page ? "bg-[#652d96] text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"} transition-all`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-lg ${currentPage === totalPages ? "bg-gray-300 cursor-not-allowed" : "bg-[#652d96] text-white hover:bg-[#652d96c9]"} transition-all`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-xl p-6 shadow-md border border-indigo-100 text-center">
                 <h3 className="font-semibold text-xl text-[#652d96]">No Offers Yet</h3>
