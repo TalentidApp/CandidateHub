@@ -4,10 +4,33 @@ import { FaStar, FaGlobe, FaPhone, FaEnvelope, FaChevronDown, FaChevronUp } from
 import Header from "../components/common/Header";
 import defaultLogo from "../assets/kb.png";
 import { api } from "../lib/api";
+import useAuthStore from "../constants/store";
+import toast from "react-hot-toast";
+
+const FeedbackCard = ({ rating, comment, createdAt, reviewer }) => {
+  return (
+    <div className="flex flex-col p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-purple-100">
+      <div className="flex items-center mb-4">
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100">
+          <span className="text-lg font-semibold text-purple-600">{rating}/5</span>
+        </div>
+        <p className="ml-4 text-sm font-medium text-gray-700">
+          From: {reviewer?.name || "Anonymous"}
+        </p>
+      </div>
+      <p className="text-sm text-gray-700">{comment || "No comment provided."}</p>
+      <p className="text-xs text-gray-500 mt-2">
+        Posted: {createdAt ? new Date(createdAt).toLocaleDateString() : "N/A"}
+      </p>
+    </div>
+  );
+};
 
 const CareerPage = () => {
   const { companyName } = useParams();
+  const { user, token } = useAuthStore();
   const [companyData, setCompanyData] = useState({
+    _id: null,
     logo: defaultLogo,
     companyName: decodeURIComponent(companyName) || "Unknown Company",
     address: "Location not specified",
@@ -22,8 +45,14 @@ const CareerPage = () => {
     employeeCount: 0,
     foundedYear: 0,
   });
+  const [feedbackData, setFeedbackData] = useState([]);
   const [error, setError] = useState(null);
   const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(1);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackError, setFeedbackError] = useState(null);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(null);
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
@@ -33,6 +62,7 @@ const CareerPage = () => {
         console.log("✅ API response:", response.data);
         const company = response.data.data;
         setCompanyData({
+          _id: company._id || null,
           logo: company.logo || defaultLogo,
           companyName: company.companyName || decodeURIComponent(companyName) || "Unknown Company",
           address: company.address || "Location not specified",
@@ -52,6 +82,7 @@ const CareerPage = () => {
         console.error("❌ Error fetching company:", err.response?.data);
         setError(err.response?.status === 404 ? `Company "${decodeURIComponent(companyName)}" not found` : "Failed to load company data.");
         setCompanyData({
+          _id: null,
           logo: defaultLogo,
           companyName: decodeURIComponent(companyName) || "Unknown Company",
           address: "Location not specified",
@@ -69,10 +100,79 @@ const CareerPage = () => {
       }
     };
 
+    const fetchFeedback = async () => {
+      if (!companyData._id) return;
+      try {
+        const response = await api.get(`/api/feedback/received/Company/${companyData._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFeedbackData(response.data.feedback || []);
+      } catch (err) {
+        console.error("❌ Error fetching feedback:", err.response?.data);
+        setFeedbackData([]);
+        toast.error("Failed to load company feedback.");
+      }
+    };
+
     if (companyName) {
       fetchCompanyDetails();
     }
-  }, [companyName]);
+    if (companyData._id) {
+      fetchFeedback();
+    }
+  }, [companyName, companyData._id, token]);
+
+  const handleSubmitFeedback = async () => {
+    if (!token) {
+      toast.error("Please log in to submit feedback.");
+      setShowFeedbackForm(false);
+      return;
+    }
+    if (!user?.data?._id) {
+      setFeedbackError("User information not available.");
+      return;
+    }
+    if (!companyData._id) {
+      setFeedbackError("Company information not available.");
+      return;
+    }
+    setFeedbackError(null);
+    setFeedbackSuccess(null);
+    try {
+      await api.post(
+        `/api/feedback/submit`,
+        {
+          reviewerId: user.data._id,
+          reviewerModel: "HiringCandidate",
+          recipientId: companyData._id,
+          recipientModel: "Company",
+          companyId: companyData._id,
+          rating: feedbackRating,
+          comment: feedbackComment,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setFeedbackSuccess("Feedback submitted successfully!");
+      toast.success("Feedback submitted successfully!");
+      setTimeout(() => {
+        setShowFeedbackForm(false);
+        setFeedbackRating(1);
+        setFeedbackComment("");
+        setFeedbackSuccess(null);
+        // Refresh feedback
+        api.get(`/api/feedback/received/Company/${companyData._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((response) => setFeedbackData(response.data.feedback || []));
+      }, 1500);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      const errorMessage = error.response?.data?.message || "Failed to submit feedback.";
+      setFeedbackError(errorMessage);
+      toast.error(errorMessage);
+    }
+  };
 
   const toggleAbout = () => setIsAboutExpanded(!isAboutExpanded);
 
@@ -111,6 +211,93 @@ const CareerPage = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Write Feedback Button */}
+        <div className="mb-12 animate-fade-in">
+          <button
+            className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 hover:scale-105 transition-all duration-200"
+            onClick={() => setShowFeedbackForm(true)}
+            aria-label={`Write feedback for ${companyData.companyName}`}
+          >
+            Write Feedback
+          </button>
+        </div>
+
+        {/* Feedback Form Modal */}
+        {showFeedbackForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg shadow-xl max-w-sm w-full">
+              <h3 className="text-base font-semibold text-purple-800 mb-2">Feedback for {companyData.companyName}</h3>
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Rating (1–5)</label>
+                  <select
+                    value={feedbackRating}
+                    onChange={(e) => setFeedbackRating(Number(e.target.value))}
+                    className="block w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  >
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <option key={num} value={num}>{num}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Comment (optional)</label>
+                  <textarea
+                    value={feedbackComment}
+                    onChange={(e) => setFeedbackComment(e.target.value)}
+                    maxLength={500}
+                    rows={3}
+                    className="block w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    placeholder="Share your feedback about the company..."
+                  ></textarea>
+                </div>
+                {feedbackError && <p className="text-red-500 text-xs">{feedbackError}</p>}
+                {feedbackSuccess && <p className="text-green-500 text-xs">{feedbackSuccess}</p>}
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setShowFeedbackForm(false);
+                    setFeedbackRating(1);
+                    setFeedbackComment("");
+                    setFeedbackError(null);
+                    setFeedbackSuccess(null);
+                  }}
+                  className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitFeedback}
+                  className="px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-medium hover:bg-purple-700"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Company Feedback Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-12 animate-fade-in">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Company Feedback</h3>
+          {feedbackData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {feedbackData.map((feedback, index) => (
+                <FeedbackCard
+                  key={`feedback-${index}`}
+                  rating={feedback.rating}
+                  comment={feedback.comment}
+                  createdAt={feedback.createdAt}
+                  reviewer={feedback.reviewerId}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600">No feedback available for {companyData.companyName}.</p>
+          )}
         </div>
 
         {/* Company Details */}
