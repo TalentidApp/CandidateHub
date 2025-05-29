@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 import Header from "../components/common/Header";
 import video from "../assets/v.mp4";
 import useAuthStore from "../constants/store";
@@ -71,7 +71,15 @@ const Dashboard = () => {
 
   const confirmRejectOffer = async () => {
     try {
-      await api.post("/api/offer/offer/updateStatus", { offerId: offerToReject, status: "Declined" });
+      const res = await api.post("/api/offer/offer/updateStatus", { offerId: offerToReject, status: "Declined" });
+      if (res.data) {
+        toast.success('Offer Rejected', {
+          style: {
+            backgroundColor: '#652d96',
+            color: '#ffffff',
+          },
+        });
+      }
       fetchOffers();
     } catch (err) {
       console.error("Reject offer error:", err.response?.data);
@@ -130,10 +138,10 @@ const Dashboard = () => {
         comment: feedbackComment,
       });
       setFeedbackSuccess("Feedback submitted successfully!");
-      toast.success(`Feedback submitted successfully!`,{
-        style : {
-                    backgroundColor: '#652d96',
-          color: '#ffffff', 
+      toast.success(`Feedback submitted successfully!`, {
+        style: {
+          backgroundColor: '#652d96',
+          color: '#ffffff',
         }
       })
       setTimeout(() => {

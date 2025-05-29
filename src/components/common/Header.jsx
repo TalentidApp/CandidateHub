@@ -95,7 +95,7 @@ const Header = () => {
         <img
           src={logo}
           alt="TalentID Logo"
-          className="h-8 w-auto cursor-pointer transition-transform hover:scale-105"
+          className="h-6 w-auto cursor-pointer"
           onClick={() => navigate('/')}
         />
       </div>

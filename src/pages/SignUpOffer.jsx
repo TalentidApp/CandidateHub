@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../constants/store';
-import toast from 'react-hot-toast';
+import {toast } from 'sonner';
 
 const SignDocument = () => {
   const { state } = useLocation();
@@ -28,7 +28,7 @@ const SignDocument = () => {
     try {
       const response = await axios.post(
         `${API_URL}/api/candidate/uploadDocument`,
-        { pdfUrl , email:user?.data.email , name:user?.data.name },
+        { pdfUrl, email: user?.data.email, name: user?.data.name },
         { headers: { 'Content-Type': 'application/json' } }
       );
 
@@ -62,7 +62,12 @@ const SignDocument = () => {
               } catch (err) {
                 console.log(err)
               }
-              toast.success('Document signed successfully!');
+              toast.success("Document signed successfully!", {
+                style: {
+                  backgroundColor: '#652d96',
+                  color: '#ffffff',
+                },
+              });
               setTimeout(() => navigate('/'), 2000);
             } catch (err) {
               console.log(err)
