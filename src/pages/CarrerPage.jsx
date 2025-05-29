@@ -213,14 +213,6 @@ const CareerPage = () => {
               <div className="flex-1">
                 <div className="flex justify-between items-center">
                   <h1 className="text-3xl md:text-4xl font-bold animate-slide-in">{companyData.companyName}</h1>
-                  <button
-                    onClick={() => setShowFeedbackForm(true)}
-                    className="flex items-center text-sm font-semibold text-white bg-purple-500 hover:bg-purple-600 px-3 py-1.5 rounded-lg transition-all duration-200"
-                    aria-label={`Write feedback for ${companyData.companyName}`}
-                  >
-                    <FaPen className="mr-2" />
-                    Write Feedback
-                  </button>
                 </div>
                 <div className="flex items-center mt-4">
                   {[1, 2, 3, 4, 5].map((star) => (

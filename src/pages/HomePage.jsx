@@ -25,6 +25,8 @@ const Dashboard = () => {
   const [feedbackError, setFeedbackError] = useState(null);
   const [feedbackSuccess, setFeedbackSuccess] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [companyDetails, setCompanyDetails] = useState({}); // New state for company details
+  const [companyLoading, setCompanyLoading] = useState(false); // New loading state for companies
   const offersPerPage = 8;
 
   const fetchOffers = async () => {
@@ -48,19 +50,42 @@ const Dashboard = () => {
     }
   };
 
+  const fetchCompanyDetails = async (companyName) => {
+    try {
+      const response = await api.get(`/api/company/${encodeURIComponent(companyName)}`);
+      const company = response.data.data;
+      return {
+        _id: company._id || null,
+        companyName: company.companyName || companyName,
+      };
+    } catch (err) {
+      console.error(`Error fetching company ${companyName}:`, err.response?.data);
+      return { _id: null, companyName };
+    }
+  };
+
   useEffect(() => {
     if (user?.data?.email) {
       console.log("Fetching offers");
       fetchOffers();
-      // Show success toast on successful login
-      toast.success("Login successful", {
-        style: {
-          backgroundColor: "#652d96",
-          color: "#ffffff",
-        },
-      });
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchAllCompanyDetails = async () => {
+      if (offers.length === 0) return;
+      setCompanyLoading(true);
+      const details = {};
+      for (const offer of offers) {
+        if (offer.companyName && !details[offer.companyName]) {
+          details[offer.companyName] = await fetchCompanyDetails(offer.companyName);
+        }
+      }
+      setCompanyDetails(details);
+      setCompanyLoading(false);
+    };
+    fetchAllCompanyDetails();
+  }, [offers]);
 
   const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId } });
 
@@ -121,8 +146,13 @@ const Dashboard = () => {
   };
 
   const handleSubmitFeedback = async () => {
-    if (!feedbackOffer?.hr) {
-      setFeedbackError("Recruiter information not available");
+    if (!feedbackOffer?.companyName) {
+      setFeedbackError("Company information not available");
+      return;
+    }
+    const companyId = companyDetails[feedbackOffer.companyName]?._id;
+    if (!companyId) {
+      setFeedbackError("Company ID not found");
       return;
     }
     setFeedbackError(null);
@@ -132,10 +162,13 @@ const Dashboard = () => {
       await api.post("/api/feedback/submit", {
         reviewerId: user.data._id,
         reviewerModel: "HiringCandidate",
-        recipientId: feedbackOffer.hr,
+        recipientId: companyId,
         recipientModel: "Company",
+        companyId: companyId,
         rating: feedbackRating,
         comment: feedbackComment,
+      }, {
+        headers: { Authorization: `Bearer ${user.token}` },
       });
       setFeedbackSuccess("Feedback submitted successfully!");
       toast.success(`Feedback submitted successfully!`, {
@@ -143,7 +176,7 @@ const Dashboard = () => {
           backgroundColor: '#652d96',
           color: '#ffffff',
         }
-      })
+      });
       setTimeout(() => {
         handleCloseFeedbackPopup();
       }, 1500);
@@ -168,7 +201,7 @@ const Dashboard = () => {
     setCurrentPage(pageNumber);
   };
 
-  if (offersLoading) {
+  if (offersLoading || companyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-indigo-50 to-indigo-200">
         <Loader />
@@ -207,7 +240,9 @@ const Dashboard = () => {
                     >
                       <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#652d96] rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
                       <h3 className="font-semibold text-xl text-[#652d96] transition-all">{offer.jobTitle}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{offer.hr?.company || "Talentid.app"}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {companyDetails[offer.companyName]?.companyName || offer.companyName || "Unknown Company"}
+                      </p>
                       <div className="mt-3 space-y-1">
                         <p className="text-sm text-gray-500">
                           Status: <span className="font-medium text-indigo-600">{offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
@@ -240,7 +275,7 @@ const Dashboard = () => {
                             </button>
                             <button
                               onClick={() => handleOpenFeedbackPopup(offer)}
-                              title="Write feedback about the recruiter"
+                              title="Write feedback about the company"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <Pen size={20} />
@@ -251,7 +286,7 @@ const Dashboard = () => {
                             <button className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">Retracted</button>
                             <button
                               onClick={() => handleOpenFeedbackPopup(offer)}
-                              title="Write feedback about the recruiter"
+                              title="Write feedback about the company"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <Pen size={20} />
@@ -260,19 +295,19 @@ const Dashboard = () => {
                         ) : (
                           <>
                             <button
-                              onClick={() => handleViewFile(offer.acceptedLetter)}
+                              onClick={() => handleViewFile(offer.acceptedLetter || offer.offerLetterLink)}
                               title="View signed offer letter"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <FileText size={20} />
                             </button>
-                            {/* <button
+                            <button
                               onClick={() => handleOpenFeedbackPopup(offer)}
-                              title="Write feedback about the recruiter"
+                              title="Write feedback about the company"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <Pen size={20} />
-                            </button> */}
+                            </button>
                           </>
                         )}
                       </div>
@@ -388,7 +423,7 @@ const Dashboard = () => {
             >
               ×
             </button>
-            <h3 className="text-xl font-semibold text-[#652d96] mb-4">Submit Feedback</h3>
+            <h3 className="text-xl font-semibold text-[#652d96] mb-4">Feedback for {companyDetails[feedbackOffer.companyName]?.companyName || feedbackOffer.companyName}</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Rating (1–5)</label>
@@ -412,7 +447,7 @@ const Dashboard = () => {
                   maxLength={500}
                   rows={4}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Share your feedback about the recruiter..."
+                  placeholder="Share your feedback about the company..."
                 />
               </div>
               {feedbackError && <p className="text-red-500 text-sm">{feedbackError}</p>}

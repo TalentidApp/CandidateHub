@@ -4,6 +4,7 @@ import { FaEnvelope, FaLock, FaUser, FaSearch, FaClipboardList } from "react-ico
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
+import { toast } from "sonner";
 
 const Login = () => {
   const {
@@ -48,7 +49,12 @@ const Login = () => {
     const success = await login(data);
     if (success) {
       await fetchCandidateDetails();
-      console.log("Redirecting to dashboard");
+      toast.success('Login Successful', {
+        style: {
+          backgroundColor: '#652d96',
+          color: '#ffffff',
+        },
+      });
       navigate("/", { replace: true });
     } else {
       console.log("Login failed, error:", authError);
