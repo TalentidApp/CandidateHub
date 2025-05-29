@@ -8,7 +8,6 @@ import useAuthStore from "../constants/store";
 import toast from "react-hot-toast";
 import Loader from "@/components/common/Loader";
 
-// FeedbackCard component remains unchanged
 const FeedbackCard = ({ rating, comment, createdAt, reviewer }) => {
   return (
     <div className="flex flex-col p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-purple-100">
@@ -16,17 +15,17 @@ const FeedbackCard = ({ rating, comment, createdAt, reviewer }) => {
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100">
           <span className="text-lg font-semibold text-purple-600">{rating}/5</span>
         </div>
-        <p className="ml-4 text-sm font-medium text-gray-700">
-          From: {reviewer?.name || "Anonymous"}
-        </p>
       </div>
-      <p className="text-sm text-gray-700">{comment || "No comment provided."}</p>
+      <p className="text-sm text-gray-700 px-3 break-words max-w-full line-clamp-3">
+        {comment || "No comment provided."}
+      </p>
       <p className="text-xs text-gray-500 mt-2">
         Posted: {createdAt ? new Date(createdAt).toLocaleDateString() : "N/A"}
       </p>
     </div>
   );
 };
+
 
 const CareerPage = () => {
   const { companyName } = useParams();
