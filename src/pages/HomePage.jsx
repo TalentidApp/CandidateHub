@@ -1,36 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "sonner"; 
 import Header from "../components/common/Header";
 import video from "../assets/v.mp4";
 import useAuthStore from "../constants/store";
 import Loader from "../components/common/Loader";
 import { api } from "../lib/api";
 import { FileText, Pen } from "lucide-react";
-import { FaStar } from "react-icons/fa";
-
-const FeedbackCard = ({ rating, comment, createdAt, reviewer }) => {
-  return (
-    <div className="flex flex-col p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-purple-100">
-      <div className="flex items-center mb-4">
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-100">
-          <span className="text-lg font-semibold text-purple-600">{rating}/5</span>
-        </div>
-        <p className="ml-4 text-sm font-medium text-gray-700">
-          From: {reviewer?.name || "Anonymous"}
-        </p>
-      </div>
-      <p className="text-sm text-gray-700">{comment || "No comment provided."}</p>
-      <p className="text-xs text-gray-500 mt-2">
-        Posted: {createdAt ? new Date(createdAt).toLocaleDateString() : "N/A"}
-      </p>
-    </div>
-  );
-};
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, token, isAuthenticated, offers, feedbackData, setOffers, setFeedbackData, clearAuthState } = useAuthStore();
+  const { user } = useAuthStore();
+  const [offers, setOffers] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -47,23 +28,17 @@ const Dashboard = () => {
   const offersPerPage = 8;
 
   const fetchOffers = async () => {
-    if (!token || !isAuthenticated) {
-      setOffersError("Please log in to view offers.");
-      return;
-    }
     setOffersLoading(true);
     setOffersError(null);
     try {
-      const response = await api.get("/api/offer/offers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get("/api/offer/offers");
       console.log("Fetch offers response:", response.data);
       setOffers(response.data.data || []);
     } catch (err) {
       console.error("Fetch offers error:", err.response?.data);
       if (err.response?.status === 401) {
         setOffersError("Session expired. Please log in again.");
-        clearAuthState();
+        useAuthStore.getState().clearAuthState();
         navigate("/login", { replace: true });
       } else {
         setOffersError(err.response?.data?.message || "Failed to fetch offers");
@@ -73,26 +48,11 @@ const Dashboard = () => {
     }
   };
 
-  const fetchFeedback = async (companyId) => {
-    if (!companyId || !token) return;
-    try {
-      const response = await api.get(`/api/feedback/received/Company/${companyId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFeedbackData(companyId, response.data.feedback || []);
-    } catch (err) {
-      console.error("Error fetching feedback:", err.response?.data);
-      toast.error("Failed to load company feedback.", {
-        style: { backgroundColor: "#ef4444", color: "#ffffff" },
-      });
-      setFeedbackData(companyId, []);
-    }
-  };
-
   useEffect(() => {
-    if (isAuthenticated && user?.data?.email && token) {
+    if (user?.data?.email) {
       console.log("Fetching offers");
       fetchOffers();
+      // Show success toast on successful login
       toast.success("Login successful", {
         style: {
           backgroundColor: "#652d96",
@@ -100,15 +60,7 @@ const Dashboard = () => {
         },
       });
     }
-  }, [isAuthenticated, user, token]);
-
-  useEffect(() => {
-    offers.forEach((offer) => {
-      if (offer.companyId && !feedbackData[offer.companyId]) {
-        fetchFeedback(offer.companyId);
-      }
-    });
-  }, [offers, feedbackData, token]);
+  }, [user]);
 
   const handleSignOffer = (offerLink, offerId) => navigate("/sign-offer", { state: { offerLink, offerId } });
 
@@ -118,24 +70,14 @@ const Dashboard = () => {
   };
 
   const confirmRejectOffer = async () => {
-    if (!token) {
-      toast.error("Please log in to reject offer.", {
-        style: { backgroundColor: "#ef4444", color: "#ffffff" },
-      });
-      return;
-    }
     try {
-      await api.post(
-        "/api/offer/offer/updateStatus",
-        { offerId: offerToReject, status: "Declined" },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.post("/api/offer/offer/updateStatus", { offerId: offerToReject, status: "Declined" });
       fetchOffers();
     } catch (err) {
       console.error("Reject offer error:", err.response?.data);
       if (err.response?.status === 401) {
         setOffersError("Session expired. Please log in again.");
-        clearAuthState();
+        useAuthStore.getState().clearAuthState();
         navigate("/login", { replace: true });
       } else {
         setOffersError(err.response?.data?.message || "Failed to reject offer");
@@ -157,12 +99,6 @@ const Dashboard = () => {
   };
 
   const handleOpenFeedbackPopup = (offer) => {
-    if (!isAuthenticated || !token) {
-      toast.error("Please log in to submit feedback.", {
-        style: { backgroundColor: "#ef4444", color: "#ffffff" },
-      });
-      return;
-    }
     setFeedbackOffer(offer);
     setFeedbackRating(1);
     setFeedbackComment("");
@@ -177,57 +113,41 @@ const Dashboard = () => {
   };
 
   const handleSubmitFeedback = async () => {
-    if (!token) {
-      toast.error("Please log in to submit feedback.", {
-        style: { backgroundColor: "#ef4444", color: "#ffffff" },
-      });
-      setIsFeedbackPopupOpen(false);
-      return;
-    }
-    if (!user?.data?._id) {
-      setFeedbackError("User information not available.");
-      return;
-    }
-    if (!feedbackOffer?.companyId) {
-      setFeedbackError("Company information not available.");
+    if (!feedbackOffer?.hr) {
+      setFeedbackError("Recruiter information not available");
       return;
     }
     setFeedbackError(null);
     setFeedbackSuccess(null);
+
     try {
-      await api.post(
-        "/api/feedback/submit",
-        {
-          reviewerId: user.data._id,
-          reviewerModel: "HiringCandidate",
-          recipientId: feedbackOffer.companyId,
-          recipientModel: "Company",
-          companyId: feedbackOffer.companyId,
-          rating: feedbackRating,
-          comment: feedbackComment,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post("/api/feedback/submit", {
+        reviewerId: user.data._id,
+        reviewerModel: "HiringCandidate",
+        recipientId: feedbackOffer.hr,
+        recipientModel: "Company",
+        rating: feedbackRating,
+        comment: feedbackComment,
+      });
       setFeedbackSuccess("Feedback submitted successfully!");
-      toast.success("Feedback submitted successfully!", {
-        style: { backgroundColor: "#652d96", color: "#ffffff" },
-      });
+      toast.success(`Feedback submitted successfully!`,{
+        style : {
+                    backgroundColor: '#652d96',
+          color: '#ffffff', 
+        }
+      })
       setTimeout(() => {
-        setIsFeedbackPopupOpen(false);
-        setFeedbackRating(1);
-        setFeedbackComment("");
-        setFeedbackSuccess(null);
-        fetchFeedback(feedbackOffer.companyId);
+        handleCloseFeedbackPopup();
       }, 1500);
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      const errorMessage = error.response?.data?.message || "Failed to submit feedback.";
-      setFeedbackError(errorMessage);
-      toast.error(errorMessage, {
-        style: { backgroundColor: "#ef4444", color: "#ffffff" },
-      });
+    } catch (err) {
+      console.error("Submit feedback error:", err.response?.data);
+      if (err.response?.status === 401) {
+        setFeedbackError("Session expired. Please log in again.");
+        useAuthStore.getState().clearAuthState();
+        navigate("/login", { replace: true });
+      } else {
+        setFeedbackError(err.response?.data?.message || "Failed to submit feedback");
+      }
     }
   };
 
@@ -280,16 +200,6 @@ const Dashboard = () => {
                       <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#652d96] rounded-full opacity-80 group-hover:scale-125 transition-all"></div>
                       <h3 className="font-semibold text-xl text-[#652d96] transition-all">{offer.jobTitle}</h3>
                       <p className="text-sm text-gray-600 mt-1">{offer.hr?.company || "Talentid.app"}</p>
-                      <div className="flex items-center mt-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <FaStar
-                            key={star}
-                            size={16}
-                            className={star <= Math.round(offer.rating || 4) ? "text-yellow-400" : "text-gray-300"}
-                          />
-                        ))}
-                        <span className="ml-2 text-sm font-semibold">{(offer.rating || 4).toFixed(1)}</span>
-                      </div>
                       <div className="mt-3 space-y-1">
                         <p className="text-sm text-gray-500">
                           Status: <span className="font-medium text-indigo-600">{offer.status === "Ghosted" ? "Accepted" : offer.status}</span>
@@ -322,7 +232,7 @@ const Dashboard = () => {
                             </button>
                             <button
                               onClick={() => handleOpenFeedbackPopup(offer)}
-                              title="Write feedback about the company"
+                              title="Write feedback about the recruiter"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <Pen size={20} />
@@ -333,7 +243,7 @@ const Dashboard = () => {
                             <button className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200">Retracted</button>
                             <button
                               onClick={() => handleOpenFeedbackPopup(offer)}
-                              title="Write feedback about the company"
+                              title="Write feedback about the recruiter"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <Pen size={20} />
@@ -348,34 +258,16 @@ const Dashboard = () => {
                             >
                               <FileText size={20} />
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => handleOpenFeedbackPopup(offer)}
-                              title="Write feedback about the company"
+                              title="Write feedback about the recruiter"
                               className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
                             >
                               <Pen size={20} />
-                            </button>
+                            </button> */}
                           </>
                         )}
                       </div>
-                      {offer.companyId && feedbackData[offer.companyId]?.length > 0 ? (
-                        <div className="mt-4">
-                          <h4 className="text-sm font-semibold text-gray-800 mb-2">Company Feedback</h4>
-                          <div className="space-y-4">
-                            {feedbackData[offer.companyId].slice(0, 2).map((feedback, index) => (
-                              <FeedbackCard
-                                key={`feedback-${offer._id}-${index}`}
-                                rating={feedback.rating}
-                                comment={feedback.comment}
-                                createdAt={feedback.createdAt}
-                                reviewer={feedback.reviewerId}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="mt-4 text-sm text-gray-600">No feedback available for this company.</p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -488,7 +380,7 @@ const Dashboard = () => {
             >
               ×
             </button>
-            <h3 className="text-xl font-semibold text-[#652d96] mb-4">Submit Feedback for {feedbackOffer.hr?.company || "Company"}</h3>
+            <h3 className="text-xl font-semibold text-[#652d96] mb-4">Submit Feedback</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Rating (1–5)</label>
@@ -512,7 +404,7 @@ const Dashboard = () => {
                   maxLength={500}
                   rows={4}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Share your feedback about the company..."
+                  placeholder="Share your feedback about the recruiter..."
                 />
               </div>
               {feedbackError && <p className="text-red-500 text-sm">{feedbackError}</p>}

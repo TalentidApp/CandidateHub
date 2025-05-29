@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FaStar, FaGlobe, FaPhone, FaEnvelope, FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaStar, FaGlobe, FaPhone, FaEnvelope, FaChevronDown, FaChevronUp, FaPen } from "react-icons/fa";
 import Header from "../components/common/Header";
 import defaultLogo from "../assets/kb.png";
 import { api } from "../lib/api";
 import useAuthStore from "../constants/store";
 import toast from "react-hot-toast";
 
+// FeedbackCard component remains unchanged
 const FeedbackCard = ({ rating, comment, createdAt, reviewer }) => {
   return (
     <div className="flex flex-col p-6 bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-purple-100">
@@ -40,7 +41,7 @@ const CareerPage = () => {
     shortDescription: "No description available.",
     contactPhone: "N/A",
     contactEmail: "N/A",
-    rating: 4,
+    rating: 4, // Not used for display
     industry: "Unknown",
     employeeCount: 0,
     foundedYear: 0,
@@ -53,6 +54,12 @@ const CareerPage = () => {
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackError, setFeedbackError] = useState(null);
   const [feedbackSuccess, setFeedbackSuccess] = useState(null);
+
+  // Calculate average rating from feedbackData
+  const averageRating =
+    feedbackData.length > 0
+      ? feedbackData.reduce((sum, feedback) => sum + feedback.rating, 0) / feedbackData.length
+      : 0;
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
@@ -72,7 +79,7 @@ const CareerPage = () => {
           shortDescription: company.shortDescription || "No description available.",
           contactPhone: company.contactPhone || "N/A",
           contactEmail: company.contactEmail || "N/A",
-          rating: company.rating || 4,
+          rating: company.rating,
           industry: company.industry || "Unknown",
           employeeCount: company.employeeCount || 0,
           foundedYear: company.foundedYear || 0,
@@ -186,7 +193,6 @@ const CareerPage = () => {
           </div>
         )}
 
-        {/* Hero Section */}
         <div className="relative bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-xl shadow-2xl overflow-hidden mb-12">
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative flex flex-col md:flex-row items-center p-8 md:p-12">
@@ -196,35 +202,33 @@ const CareerPage = () => {
               className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg object-cover mb-4 md:mb-0 md:mr-6 animate-fade-in"
               onError={(e) => (e.target.src = defaultLogo)}
             />
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold animate-slide-in">{companyData.companyName}</h1>
-              <p className="text-lg md:text-xl mt-2 animate-slide-in delay-100">{companyData.shortDescription}</p>
+            <div className="flex-1">
+              <div className="flex justify-between items-center">
+                <h1 className="text-3xl md:text-4xl font-bold animate-slide-in">{companyData.companyName}</h1>
+                <button
+                  onClick={() => setShowFeedbackForm(true)}
+                  className="flex items-center text-sm font-semibold text-white bg-purple-500 hover:bg-purple-600 px-3 py-1.5 rounded-lg transition-all duration-200"
+                  aria-label={`Write feedback for ${companyData.companyName}`}
+                >
+                  <FaPen className="mr-2" />
+                  Write Feedback
+                </button>
+              </div>
+              {/* <p className="text-lg md:text-xl mt-2 animate-slide-in delay-100">{companyData.shortDescription}</p> */}
               <div className="flex items-center mt-4">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar
                     key={star}
                     size={20}
-                    className={star <= Math.round(companyData.rating || 4) ? "text-yellow-400" : "text-gray-300"}
+                    className={star <= Math.round(averageRating || 4) ? "text-yellow-400" : "text-gray-300"}
                   />
                 ))}
-                <span className="ml-2 text-sm font-semibold">{(companyData.rating || 4).toFixed(1)}</span>
+                <span className="ml-2 text-sm font-semibold">{averageRating ? averageRating.toFixed(1) : "N/A"}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Write Feedback Button */}
-        <div className="mb-12 animate-fade-in">
-          <button
-            className="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 hover:scale-105 transition-all duration-200"
-            onClick={() => setShowFeedbackForm(true)}
-            aria-label={`Write feedback for ${companyData.companyName}`}
-          >
-            Write Feedback
-          </button>
-        </div>
-
-        {/* Feedback Form Modal */}
         {showFeedbackForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-4 rounded-lg shadow-xl max-w-sm w-full">
@@ -279,26 +283,6 @@ const CareerPage = () => {
             </div>
           </div>
         )}
-
-        {/* Company Feedback Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-12 animate-fade-in">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Company Feedback</h3>
-          {feedbackData.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {feedbackData.map((feedback, index) => (
-                <FeedbackCard
-                  key={`feedback-${index}`}
-                  rating={feedback.rating}
-                  comment={feedback.comment}
-                  createdAt={feedback.createdAt}
-                  reviewer={feedback.reviewerId}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No feedback available for {companyData.companyName}.</p>
-          )}
-        </div>
 
         {/* Company Details */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -384,6 +368,26 @@ const CareerPage = () => {
           <div className={`mt-4 text-gray-600 leading-relaxed transition-all duration-300 ${isAboutExpanded ? "max-h-96" : "max-h-24"} overflow-hidden`}>
             {companyData.about}
           </div>
+        </div>
+
+        {/* Feedback Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-12 animate-fade-in">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Company Feedback</h3>
+          {feedbackData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {feedbackData.map((feedback, index) => (
+                <FeedbackCard
+                  key={`feedback-${index}`}
+                  rating={feedback.rating}
+                  comment={feedback.comment}
+                  createdAt={feedback.createdAt}
+                  reviewer={feedback.reviewerId}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600">No feedback available for {companyData.companyName}.</p>
+          )}
         </div>
       </main>
     </div>
