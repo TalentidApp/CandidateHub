@@ -5,13 +5,13 @@ import App from './App.jsx';
 
 import { BrowserRouter } from 'react-router-dom';
 
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/sonner';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <Toaster/>
-        <App />
+      <Toaster />
+      <App />
     </BrowserRouter>
   </StrictMode>,
 )

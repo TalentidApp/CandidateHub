@@ -5,7 +5,7 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../constants/store";
-
+import { toast } from "sonner";
 
 const Login = () => {
   const {
@@ -32,13 +32,13 @@ const Login = () => {
   const { isAuthenticated, login, fetchCandidateDetails, error: authError, clearAuthState } = useAuthStore();
 
   useEffect(() => {
-    console.log("Login component mounted, auth state:", { isAuthenticated }); // Debug log
+    console.log("Login component mounted, auth state:", { isAuthenticated });
     clearAuthState();
   }, [clearAuthState]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("Authenticated, redirecting to dashboard"); // Debug log
+      console.log("Authenticated, redirecting to dashboard");
       navigate("/", { replace: true });
     }
   }, [isAuthenticated, navigate]);
@@ -46,15 +46,20 @@ const Login = () => {
   const submitHandler = async (data) => {
     setLoading(true);
     setError(null);
-    console.log("Attempting login with:", data); // Debug log
+    console.log("Attempting login with:", data);
     const success = await login(data);
     if (success) {
-      console.log("Login successful, fetching candidate details"); // Debug log
+      toast.success("Login successful", {
+        style: {
+          backgroundColor: '#652d96',
+          color: '#ffffff', 
+        },
+      });
       await fetchCandidateDetails();
-      console.log("Redirecting to dashboard"); // Debug log
+      console.log("Redirecting to dashboard");
       navigate("/", { replace: true });
     } else {
-      console.log("Login failed, error:", authError); // Debug log
+      console.log("Login failed, error:", authError);
       setError(authError || "Login failed");
     }
     setLoading(false);
@@ -63,7 +68,6 @@ const Login = () => {
   const handleForgotPassword = async () => {
     setLoading(true);
     setError(null);
-    console.log("Sending OTP for forgot password:", forgotEmail); // Debug log
     try {
       await axios.post(`${API_URL}/api/candidate/forgot-password-email`, {
         email: forgotEmail,
@@ -71,7 +75,7 @@ const Login = () => {
       setShowForgotPopup(false);
       setShowOtpPopup(true);
     } catch (err) {
-      console.error("Forgot password error:", err.response?.data); // Debug log
+      console.error("Forgot password error:", err.response?.data);
       setError(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
@@ -81,7 +85,7 @@ const Login = () => {
   const handleVerifyOtp = async () => {
     setLoading(true);
     setError(null);
-    console.log("Verifying OTP:", { email: forgotEmail, otp }); // Debug log
+    console.log("Verifying OTP:", { email: forgotEmail, otp });
     try {
       await axios.post(`${API_URL}/api/candidate/verify-otp`, {
         email: forgotEmail,
@@ -90,7 +94,7 @@ const Login = () => {
       setShowOtpPopup(false);
       setShowResetPopup(true);
     } catch (err) {
-      console.error("OTP verification error:", err.response?.data); // Debug log
+      console.error("OTP verification error:", err.response?.data);
       setError(err.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
@@ -100,7 +104,6 @@ const Login = () => {
   const handleResetPassword = async (data) => {
     setLoading(true);
     setError(null);
-    console.log("Resetting password for:", forgotEmail); // Debug log
     try {
       await axios.post(`${API_URL}/api/candidate/forgot-password`, {
         email: forgotEmail,
@@ -110,7 +113,7 @@ const Login = () => {
       setShowResetPopup(false);
       navigate("/login", { replace: true });
     } catch (err) {
-      console.error("Reset password error:", err.response?.data); // Debug log
+      console.error("Reset password error:", err.response?.data); A
       setError(err.response?.data?.message || "Reset failed");
     } finally {
       setLoading(false);

@@ -385,25 +385,6 @@ const CareerPage = () => {
             {companyData.about}
           </div>
         </div>
-
-        {/* Highlights Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-12 animate-fade-in delay-100">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Company Highlights</h3>
-          <ul className="space-y-3 text-gray-600">
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
-              Recognized as a leader in {companyData.industry || "its field"} by industry analysts.
-            </li>
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
-              Serving clients in over {Math.ceil(companyData.employeeCount / 100) || 1} countries.
-            </li>
-            <li className="flex items-center">
-              <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
-              Committed to sustainability and innovation since {companyData.foundedYear || "its founding"}.
-            </li>
-          </ul>
-        </div>
       </main>
     </div>
   );

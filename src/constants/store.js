@@ -1,8 +1,9 @@
+// constants/store.js
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
 
-const API_URL = 'https://talentid-backend-v2.vercel.app';
+const API_URL = "https://talentid-backend-v2.vercel.app";
 
 const useAuthStore = create(
   persist(
@@ -12,6 +13,8 @@ const useAuthStore = create(
       isAuthenticated: false,
       loading: false,
       error: null,
+      offers: [],
+      feedbackData: {}, // Store feedback by companyId: { [companyId]: feedbackArray }
 
       login: async (credentials) => {
         set({ loading: true, error: null });
@@ -120,6 +123,8 @@ const useAuthStore = create(
             isAuthenticated: false,
             loading: false,
             error: null,
+            offers: [],
+            feedbackData: {},
           });
         }
       },
@@ -132,8 +137,16 @@ const useAuthStore = create(
           isAuthenticated: false,
           loading: false,
           error: null,
+          offers: [],
+          feedbackData: {},
         });
       },
+
+      setOffers: (offers) => set({ offers }),
+      setFeedbackData: (companyId, feedback) =>
+        set((state) => ({
+          feedbackData: { ...state.feedbackData, [companyId]: feedback },
+        })),
     }),
     {
       name: "auth-storage",
