@@ -69,7 +69,7 @@ const TalentIDSignup = () => {
       <div className="w-full max-w-7xl bg-white rounded-3xl shadow-2xl overflow-hidden">
         <div className="flex flex-col lg:flex-row min-h-[700px]">
           {/* Left Side - Features */}
-          <div className="lg:w-3/5 bg-gradient-to-br from-white to-purple-200 p-8 lg:p-12 flex flex-col justify-center">
+          <div className="lg:w-3/5 bg-gradient-to-br from-white to-purple-200 p-8 lg:p-12 flex flex-col justify-center max-lg:order-2">
             <div className="max-w-2xl mx-auto">
               {/* Main Heading */}
               <div className="text-center mb-12">
@@ -106,7 +106,7 @@ const TalentIDSignup = () => {
           </div>
 
           {/* Right Side - Signup Form */}
-          <div className="lg:w-2/5 p-8 lg:p-12 flex flex-col justify-center">
+          <div className="lg:w-2/5 p-8 lg:p-12 flex flex-col justify-center max-lg:order-1">
             <div className="max-w-md mx-auto w-full">
               {/* Logo and Branding */}
               <div className="mb-8 flex items-center gap-3">

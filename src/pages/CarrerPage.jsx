@@ -5,7 +5,7 @@ import Header from "../components/common/Header";
 import defaultLogo from "../assets/kb.png";
 import { api } from "../lib/api";
 import useAuthStore from "../constants/store";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import Loader from "@/components/common/Loader";
 
 const FeedbackCard = ({ rating, comment, createdAt, reviewer }) => {
@@ -165,7 +165,12 @@ const CareerPage = () => {
         }
       );
       setFeedbackSuccess("Feedback submitted successfully!");
-      toast.success("Feedback submitted successfully!");
+      toast.success("Feedback submitted successfully!", {
+        style: {
+          backgroundColor: '#652d96',
+          color: '#ffffff',
+        }
+      });
       setTimeout(() => {
         setShowFeedbackForm(false);
         setFeedbackRating(1);
@@ -190,7 +195,7 @@ const CareerPage = () => {
       <Header />
       {isLoading ? (
         <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
-          <Loader/>
+          <Loader />
         </div>
       ) : (
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">

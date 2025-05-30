@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaUserCircle, FaCog, FaSignOutAlt, FaTimes, FaSearch, FaAngleDown, FaFileAlt } from 'react-icons/fa';
+import { FaUserCircle, FaCog, FaSignOutAlt, FaTimes, FaSearch, FaAngleDown } from 'react-icons/fa';
 import logo from '../../assets/logo.png';
 import useAuthStore from '../../constants/store';
 import { Link, useNavigate } from 'react-router-dom';
@@ -162,13 +162,13 @@ const Header = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link
+                    {/* <Link
                       to="/tests"
                       className="flex items-center text-[#652d96] hover:bg-purple-50 hover:text-[#4b2270] p-2 rounded-md transition-colors"
                       onClick={() => setShowProfile(false)}
                     >
                       <FaFileAlt className="mr-2 text-[#652d96]" /> Tests
-                    </Link>
+                    </Link> */}
                   </li>
                   <li>
                     <Link
