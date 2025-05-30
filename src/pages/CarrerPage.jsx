@@ -33,6 +33,7 @@ const CareerPage = () => {
   const [isLoading, setIsLoading] = useState(true); // New loading state
   const [companyData, setCompanyData] = useState({
     _id: null,
+    bio:"",
     logo: defaultLogo,
     companyName: decodeURIComponent(companyName) || "Unknown Company",
     address: "Location not specified",
@@ -42,7 +43,7 @@ const CareerPage = () => {
     shortDescription: "No description available.",
     contactPhone: "N/A",
     contactEmail: "N/A",
-    rating: 4, // Not used for display
+    rating: 4,
     industry: "Unknown",
     employeeCount: 0,
     foundedYear: 0,
@@ -71,6 +72,7 @@ const CareerPage = () => {
         const company = response.data.data;
         setCompanyData({
           _id: company._id || null,
+          bio: company.bio || "",
           logo: company.logo || defaultLogo,
           companyName: company.companyName || decodeURIComponent(companyName) || "Unknown Company",
           address: company.address || "Location not specified",
@@ -218,6 +220,7 @@ const CareerPage = () => {
                 <div className="flex justify-between items-center">
                   <h1 className="text-3xl md:text-4xl font-bold animate-slide-in">{companyData.companyName}</h1>
                 </div>
+                <div className="mt-1 ml-1 text-white/80">{companyData.bio}</div>
                 <div className="flex items-center mt-4">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <FaStar
@@ -287,9 +290,7 @@ const CareerPage = () => {
             </div>
           )}
 
-          {/* Company Details */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {/* Stats Card */}
             <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 animate-fade-in">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Company Stats</h3>
               <div className="space-y-4">
@@ -303,7 +304,6 @@ const CareerPage = () => {
               </div>
             </div>
 
-            {/* Contact Card */}
             <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 animate-fade-in delay-100">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Contact Information</h3>
               <div className="space-y-4">
