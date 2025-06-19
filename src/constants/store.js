@@ -1,4 +1,3 @@
-// constants/store.js
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
@@ -14,7 +13,7 @@ const useAuthStore = create(
       loading: false,
       error: null,
       offers: [],
-      feedbackData: {}, // Store feedback by companyId: { [companyId]: feedbackArray }
+      feedbackData: {},
 
       login: async (credentials) => {
         set({ loading: true, error: null });

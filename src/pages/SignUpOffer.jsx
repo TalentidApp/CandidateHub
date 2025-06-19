@@ -6,14 +6,15 @@ import {toast } from 'sonner';
 
 const SignDocument = () => {
   const { state } = useLocation();
-  const { offerId, offerLink, newtoken } = state || {};
+  const { offerId, offerLink } = state || {};
   const pdfUrl = offerLink?.replace('http://', 'https://');
   const [, setDocumentId] = useState(null);
+
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   let token = '';
-  const { user } = useAuthStore();
+  const { user , token:newtoken} = useAuthStore();
 
   const API_URL = 'https://talentid-backend-v2.vercel.app';
 

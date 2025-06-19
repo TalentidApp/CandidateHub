@@ -25,8 +25,8 @@ const Dashboard = () => {
   const [feedbackError, setFeedbackError] = useState(null);
   const [feedbackSuccess, setFeedbackSuccess] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [companyDetails, setCompanyDetails] = useState({}); // New state for company details
-  const [companyLoading, setCompanyLoading] = useState(false); // New loading state for companies
+  const [companyDetails, setCompanyDetails] = useState({});
+  const [companyLoading, setCompanyLoading] = useState(false);
   const offersPerPage = 8;
 
   const fetchOffers = async () => {
@@ -399,13 +399,13 @@ const Dashboard = () => {
             <div className="flex gap-4 justify-end">
               <button
                 onClick={() => setIsConfirmOpen(false)}
-                className="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all"
+                className="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmRejectOffer}
-                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+                className="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200"
               >
                 Reject
               </button>
@@ -423,31 +423,38 @@ const Dashboard = () => {
             >
               ×
             </button>
-            <h3 className="text-xl font-semibold text-[#652d96] mb-4">Feedback for {companyDetails[feedbackOffer.companyName]?.companyName || feedbackOffer.companyName}</h3>
+            <h3 className="text-xl font-semibold text-[#652d96] mb-4">
+              Feedback for {companyDetails[feedbackOffer.companyName]?.companyName || feedbackOffer.companyName || "Unknown Company"}
+            </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Rating (1–5)</label>
-                <select
-                  value={feedbackRating}
-                  onChange={(e) => setFeedbackRating(Number(e.target.value))}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-sm font-medium text-gray-700">Rating</label>
+                <div className="flex space-x-2">
+                  {Array.from({ length: 5 }, (_, idx) => {
+                    const starRating = idx + 1;
+                    return (
+                      <span
+                        key={starRating}
+                        onClick={() => setFeedbackRating(starRating)}
+                        className={`cursor-pointer text-2xl transition-all duration-200 ${
+                          starRating <= feedbackRating ? "text-[#652d96]" : "text-gray-300"
+                        }`}
+                      >
+                        ★
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Comment (optional)</label>
                 <textarea
+                  placeholder="Share your feedback about the company..."
                   value={feedbackComment}
                   onChange={(e) => setFeedbackComment(e.target.value)}
                   maxLength={500}
                   rows={4}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Share your feedback about the company..."
+                  className="mt-1 block w-full px-3 py-2 border rounded-lg border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
               {feedbackError && <p className="text-red-500 text-sm">{feedbackError}</p>}
@@ -455,13 +462,13 @@ const Dashboard = () => {
               <div className="flex gap-4 justify-end">
                 <button
                   onClick={handleCloseFeedbackPopup}
-                  className="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all"
+                  className="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitFeedback}
-                  className="px-5 py-2 bg-[#652d96] text-white rounded-lg hover:bg-[#652d96c9] transition-all"
+                  className="px-5 py-2 bg-[#652d96] text-white rounded-lg hover:bg-[#652d96c9] transition-all duration-200"
                 >
                   Submit
                 </button>
